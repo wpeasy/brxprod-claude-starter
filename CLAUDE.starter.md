@@ -67,6 +67,9 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Never convey meaning by colour alone** — pair with text, icon, or shape. Non-text contrast (UI components / icons / focus indicators) ≥ 3:1.
 - **Respect `prefers-reduced-motion`** — BRXProd ships a reduced-motion override in the Theme CSS; don't add motion that ignores it.
 - **Forms (when added):** every field has a programmatic `<label>`; group related fields with `<fieldset>`/`<legend>`; convey validation errors as text + `aria-describedby`, not colour alone.
+- **Interactive widgets → W3C ARIA Authoring Practices Guide (APG):** https://www.w3.org/WAI/ARIA/apg/patterns/ — for accordions, tabs, dialogs/modals, menus, comboboxes, carousels, disclosure, tooltips, etc. it specifies the required roles, states, and **keyboard interaction**. Consult it whenever building or customising such a widget.
+  - **Native/Bricks first:** prefer a native element (`<details>/<summary>`, `<dialog>`, `<button>`) or Bricks' **built-in** interactive element (Accordion, Tabs, Slider, Off-canvas) — which should already ship the keyboard + ARIA — over hand-rolling APG markup. Reach for APG only when native/Bricks falls short, and **verify** the element actually meets the pattern (keyboard + roles). Custom widget JS goes through Fluent Snippets.
+  - **Scope:** the APG is for *widgets*, not document structure. For cards / lists / landmarks / figures / headings, rely on plain HTML semantics (HTML spec / MDN / WAI tutorials), per the rules above.
 
 ### Bricks styling
 - **Always use the discovered Bricks variables and classes (see the reference below) — never hard-coded/fixed values** (no literal hex, px, rem where a token exists).
