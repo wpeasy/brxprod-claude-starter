@@ -117,6 +117,7 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 #### Forms → Pro Forms when available, else Core
 - **If Bricksforge is installed *and* its Pro Forms module is enabled, build all forms with Pro Forms** (it extends the core Bricks Form with advanced actions, conditional logic, multi-step, more field types). If it's not available, use the **core Bricks Form** element.
 - Bricksforge is third-party — **don't build from memory**: confirm it's active + Pro Forms enabled, then discover the real element + controls via `bricks-list-elements` and verify via read-backs before relying on any setting.
+- **When Pro Forms is active (element `brf-pro-forms` registered), read [`PROFORMS.md`](PROFORMS.md) before building any form** — it holds the Pro Forms element map and build playbook. Skip that file entirely when Pro Forms isn't active.
 - **Field layout:** arrange field rows with a **grid + `auto-fit`** (`grid-template-columns: repeat(auto-fit, minmax(<token>, 1fr))`, gap `var(--brxw-grid-gap)`) and cap the form with a **sensible `max-width`** (snap to a `brxw-*` width / text-width token) so input lines don't get over-long; let full-width fields (textarea, submit) span all columns. No `@media` — `auto-fit` handles the reflow.
 
 #### Element labels must mirror the BEM class
