@@ -7,7 +7,7 @@
 2. **Fill placeholders:** replace `<MCP_SERVER_NAME>` with the site's connected Novamira MCP server name.
 3. **Confirm the stack rules match the site** and edit if not:
    - Code tool = **Fluent Snippets** (change if the site uses a different snippets manager).
-   - Data modelling = **Meta Box AIO Pro** (change if the site uses ACF/Pods/etc.).
+   - Data modelling = **Meta Box AIO Pro** (default). **Verify the site's actual field tool + edition** before relying on it — check active plugins for `meta-box-aio` / `meta-box` (Meta Box) vs `advanced-custom-fields-pro` / `advanced-custom-fields` (ACF Pro / Free), then edit the "CPTs & Custom Fields" rule to match. Change if the site uses ACF/Pods/etc.
    - **WP Reset** safety note (remove if WP Reset isn't installed).
    - Project prefix **`nm-` / `novamira-`** and text domain **`nm`** (set to this site's house prefix).
 4. **Generate the design-system reference:** run the **`bricks-design-tokens`** skill to append this site's actual `brxw-*` / `brxp-*` variable + class inventory (replaces the placeholder section at the bottom).
@@ -34,9 +34,9 @@ To regenerate the inventory below (after the site's design system changes, or wh
 - Set an appropriate snippet type/scope (PHP, CSS, JS, etc.) and a clear title/description, but leave it switched **off**.
 - **Snippet hygiene:** descriptive title + a group/tag; prefix every function, hook callback, option key, and asset handle with `nm_` / `novamira-` (see Naming); **enqueue** CSS/JS via `wp_enqueue_*` (no inline `<script>`/`<style>`); use the project text domain for all strings.
 
-### CPTs & Custom Fields → Meta Box only
-- **Meta Box AIO (Pro, licensed)** is the single source of truth for data modeling.
-- **All Custom Post Types, taxonomies, and custom fields MUST be created/managed via the Meta Box UI** (Meta Box → its registration/builder APIs), never via raw `register_post_type` / `register_taxonomy` / `register_meta` in code.
+### CPTs & Custom Fields → managed via the field-tool UI (never in code)
+- **State the site's data-modeling tool + edition here, after verifying which is active.** Default for this stack: **Meta Box AIO (Pro, licensed)** — confirm via the active plugin `meta-box-aio/meta-box-aio.php` (Meta Box core defines `RWMB_VER`; "AIO" is the paid all-in-one, so its presence = Pro). If the site uses **ACF** instead, swap the specifics below for ACF and record its edition — **Free** (`advanced-custom-fields`) vs **Pro** (`advanced-custom-fields-pro`; adds Repeater, Flexible Content, Options Pages, Clone, etc.; `acf_get_setting('pro')` is `true`).
+- **Whichever tool: all Custom Post Types, taxonomies, and custom fields MUST be created/managed through that tool's UI** — Meta Box (its registration/builder), or ACF (field groups + a CPT-registration UI / `acf-json` local JSON) — **never** via raw `register_post_type` / `register_taxonomy` / `register_meta` in code.
 
 ### Naming & namespacing
 Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework namespaces. Project prefix is **`nm-` / `novamira-`**:
@@ -118,7 +118,7 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.
 - **Reusable UI → Bricks components** (or global classes for pure styling); don't copy-paste element trees.
 - **Headers / footers / archives** → Bricks **templates** scoped with **template conditions** (a template with no conditions never renders).
-- **Dynamic content** → bind **Meta Box fields to Bricks dynamic data** (dynamic tags); never hardcode values that belong to a field.
+- **Dynamic content** → bind the field tool's data (**Meta Box** or **ACF** fields) to **Bricks dynamic data** (dynamic tags); never hardcode values that belong to a field.
 
 #### Forms → Pro Forms when available, else Core
 - **If Bricksforge is installed *and* its Pro Forms module is enabled, build all forms with Pro Forms** (it extends the core Bricks Form with advanced actions, conditional logic, multi-step, more field types). If it's not available, use the **core Bricks Form** element.
