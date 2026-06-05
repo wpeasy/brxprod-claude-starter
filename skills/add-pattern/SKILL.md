@@ -71,4 +71,5 @@ For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nest
 - Follow the project's `CLAUDE.md` conventions.
 - The pattern's shape/colours are a **default placeholder** from the generator (a 20px grid in `hsl(238,10%,95%)` ≈ `var(--brxp-surface-l-10)`, faded by a radial mask). To restyle, regenerate the pattern or edit the block — prefer `brxw-`/`brxp-` tokens where practical, and keep the `@abp-*` markers so it stays editable.
 - **Pairs with `brxp-has-bg-media`:** apply to the same container that has the background image; the pattern lands just behind the content.
+- **`%root%` vs class name:** author new CSS with `%root%`, but Bricks **persists the literal class selector** (e.g. `.nm-faq { … }`) and only shows `%root%` in the builder (transposing back on save). On **read-back, expect the literal** — detect the existing rule / `::after` against `.class-name`, not `%root%`, and merge into whichever root form is already stored (don't rewrite it).
 - **Builder-reload caveat:** data-layer edits won't appear in an already-open Bricks builder until it's reloaded — verify on the frontend.

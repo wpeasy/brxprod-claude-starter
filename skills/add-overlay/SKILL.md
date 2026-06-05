@@ -53,4 +53,5 @@ Why it works: `position: relative` makes `SEL` the containing block; `isolation:
 - Follow the project's `CLAUDE.md` conventions.
 - Overlay colour defaults to `#00000055` (≈33% black) as specified. If the project prefers a token, `var(--brxw-color-overlay)` is the BRXProd overlay equivalent — offer it, but don't switch without the user's say-so.
 - **Pairs with `brxp-has-bg-media`:** apply this to the same container that has the background image; the scrim lands between the image and the content.
+- **`%root%` vs class name:** author new CSS with `%root%`, but Bricks **persists the literal class selector** (e.g. `.nm-faq { … }`) and only shows `%root%` in the builder (transposing back on save). On **read-back, expect the literal** — detect the existing rule / `::before` against `.class-name`, not `%root%`, and merge into whichever root form is already stored (don't rewrite it).
 - **Builder-reload caveat:** data-layer edits won't appear in an already-open Bricks builder until it's reloaded — verify on the frontend.
