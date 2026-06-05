@@ -11,6 +11,7 @@ It gives Claude a consistent set of conventions (styling, naming, semantics, acc
 | `CLAUDE.starter.md` | The project guidance template. Copy to a site as `CLAUDE.md`, fill the placeholders, then run the skill. |
 | `skills/bricks-design-tokens/SKILL.md` | A user-level Claude Code skill that reads a site's Bricks global **variables** and **classes** (`brxw-*` / `brxp-*`, `-fluid` excluded) and writes the "Design System reference" section into that site's `CLAUDE.md`. |
 | `skills/add-overlay/SKILL.md` | A user-level Claude Code skill — `/add-overlay .class-name` or `/add-overlay #id` — that **merges** the standard dark-overlay scrim (relative + isolation + a `-900` z-index `::before`) onto a Bricks global class or element id, without clobbering existing CSS. Pairs with the `brxp-has-bg-media` background-image pattern. |
+| `skills/init-bricks/SKILL.md` | A user-level Claude Code skill — `/init-bricks` — that asks for the site **background**, default **body text**, and default **heading** colours (favouring `brxw-`/`brxp-` tokens) and writes them to the active Bricks **Theme Style** (`general.siteBackground`, `typography.typographyBody.color`, `typography.typographyHeadings.color`). |
 | `PROFORMS.md` | Conditional companion doc — the **Bricksforge Pro Forms** build playbook. `CLAUDE.md` instructs reading it only when Pro Forms is active; copy it alongside `CLAUDE.md` on sites that may use Bricksforge. |
 
 ## Prerequisites (per site)
