@@ -36,7 +36,7 @@ A **nestable** form system that replaces the core Bricks Form with advanced fiel
 ## Layout
 - **Use each field's native `width` control** (a percentage string, e.g. `"50%"` / `"100%"`) for row layout — Bricksforge flex-wraps fields by width, so two `50%` fields sit side-by-side and `100%` fields (textarea, submit) take a full row. This is the idiomatic way; **don't impose your own CSS grid** on the form wrapper (it fights Pro Forms' field structure).
 - ⚠️ The Novamira adapter warns `width` *"is not a Bricks control / dropped at render"* — that's a **false positive** for Bricksforge field elements; `width` is a real Bricksforge control and applies (Bricks emits `#brxe-<id>{width:…}`). Verify on the frontend.
-- Cap the **form panel** with a sensible `max-width` (snap to a `brxw-*` width / text-width token) on your own `nm-` form class so input lines don't get over-long. Give the panel a solid `brxp-surface-*` background + its `ally` text var so labels read clearly.
+- **Let the rails band / grid column set the form's width** — don't add a layout `max-width`. Only if the form is otherwise full-width and inputs get over-long, constrain line-length with a **text-measure** `max-width` (`brxw-text-width-*`). Give the panel a solid `brxp-surface-*` background + its `ally` text var so labels read clearly.
 - **No `@media`** — use `@container` only if a real query is needed.
 - Prefer Pro Forms' native style controls first (typed controls over raw CSS); add `nm-` global classes for panel-level styling.
 
