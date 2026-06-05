@@ -49,6 +49,9 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 ### General
 - **Always follow WordPress best-practice / coding standards** (escaping, sanitization, nonces, capability checks, hooks, i18n, naming).
 
+### Content & copy
+- **Write all titles and copy in emotive, benefit-led language from the reader's perspective.** Lead with the outcome or feeling the reader gains — not features or our point of view. Favour "you/your", active voice, and concrete, vivid benefits; avoid feature-listing, jargon, and inside-out phrasing. (e.g. *not* "BRXProd includes a layout system" → "Build pixel-perfect layouts in minutes — without fighting CSS".)
+
 ### HTML semantics & accessibility
 - **Lists are always lists.** Any list of items uses `<ul>`/`<ol>` + `<li>` — never a stack of `<div>`s. (Card grids, nav, feature lists, testimonial sets, etc.)
 - **Always consider accessibility best practices** — logical heading order, landmarks, `alt` text, form labels, visible focus states, keyboard operability, sufficient contrast (see the A11Y color pairing), and ARIA only when native semantics can't express it.
