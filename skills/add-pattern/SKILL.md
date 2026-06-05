@@ -46,7 +46,7 @@ With `SEL` = `%root%` (for a global class) or the literal `#id`:
 For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nesting stays).
 
 ### About this block
-- `position: relative` + `isolation: isolate` give `SEL` its own stacking context; the `::after` at `z-index: -50` sits **behind the content** but **above** an `add-overlay` `::before` (`-900`) and a `brxp-has-bg-media__media` image (`-1000`). Layering (back → front): **bg image (-1000) → overlay scrim (-900) → pattern (-50) → content**.
+- `position: relative` + `isolation: isolate` give `SEL` its own stacking context; the `::after` at `z-index: -50` sits **behind the content** but **above** an `add-overlay` `::before` (`-100`) and a `brxp-has-bg-media__media` image (`-1000`). Layering (back → front): **bg image (-1000) → overlay scrim (-100) → pattern (-50) → content**.
 - The `/* @abp-pattern… */ … /* @abp-pattern-end */` and `/* @abp-gradient… */ … /* @abp-gradient-end */` comments are **metadata for the Advanced Background Patterns generator** — **preserve them verbatim** so the pattern stays re-editable. Keep the data-URI percent-encoding (`%3C`, `%20`, …) intact; the **only** token Bricks substitutes is `%root%`.
 
 ## Procedure
@@ -65,7 +65,7 @@ For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nest
 6. **Verify** via read-back that the rule is present (and on the frontend if useful — the `SEL` rule + the pattern `background-image` / `mask-image`), then report what was **added** vs. **already present**.
 
 ## Coexistence
-`add-overlay` (`::before`, z `-900`) and `add-pattern` (`::after`, z `-50`) are designed to layer together. Applying both to the same `SEL` is expected — merge each into the **same** `%root%` rule (one shares the `position`/`isolation` root; the scrim is `::before`, the pattern is `::after`). Never let one overwrite the other.
+`add-overlay` (`::before`, z `-100`) and `add-pattern` (`::after`, z `-50`) are designed to layer together. Applying both to the same `SEL` is expected — merge each into the **same** `%root%` rule (one shares the `position`/`isolation` root; the scrim is `::before`, the pattern is `::after`). Never let one overwrite the other.
 
 ## Notes
 - Follow the project's `CLAUDE.md` conventions.

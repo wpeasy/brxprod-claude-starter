@@ -23,7 +23,7 @@ SEL {
   isolation: isolate;
 
   &::before {
-    z-index: -900;
+    z-index: -100;
     content: '';
     position: absolute;
     inset: 0;
@@ -32,7 +32,7 @@ SEL {
 }
 ```
 
-Why it works: `position: relative` makes `SEL` the containing block; `isolation: isolate` scopes the negative-z `::before` to this element; the `::before` at `z-index: -900` sits **above** a `brxp-has-bg-media__media` image (`-1000`) and **below** the content — i.e. it darkens a background image so foreground text keeps contrast.
+Why it works: `position: relative` makes `SEL` the containing block; `isolation: isolate` scopes the negative-z `::before` to this element; the `::before` at `z-index: -100` sits **above** a `brxp-has-bg-media__media` image (`-1000`) and **below** the content — i.e. it darkens a background image so foreground text keeps contrast.
 
 ## Procedure
 1. **Prereq:** a connected Novamira MCP server (`mcp-adapter-execute-ability`). If several are connected, confirm which site.
