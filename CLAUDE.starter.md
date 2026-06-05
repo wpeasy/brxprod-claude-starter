@@ -77,6 +77,7 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Grids: favour `auto-fit`** (e.g. `grid-template-columns: repeat(auto-fit, minmax(…, 1fr))`) so layouts respond without breakpoints.
 - **Content grids always set `align-items: stretch`** so items in a row share equal height.
 - **Bricks gotcha — Block elements default to `display: flex; flex-direction: column`.** When you want a Block to lay out as a horizontal flex row, set `flex-direction: row` **explicitly** (otherwise children stack vertically and align to the start). Only `display: flex` is not enough.
+- **Never add section/vertical padding to a section's content wrapper** (`padding-block`, or top/bottom via `padding`, on blocks like `nm-hero`, `nm-audience`). Bricks **sections already carry vertical padding from the Theme Style** (`section` → `padding` = `var(--brxw-section-space-*)`) — let the section provide it; don't duplicate. (Self-contained visual **components** — cards, coloured panels — keep their own `padding`; that's intrinsic component spacing, not section spacing.)
 - **Never use `@media` queries. Always use `@container` queries** for responsive behaviour.
 - When a `@container` query needs a query container, make the **parent** an inline-size container via the `:has()` pattern below. Transpose `%root%` to the actual class name if needed:
 
