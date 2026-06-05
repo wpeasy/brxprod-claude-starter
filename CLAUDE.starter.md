@@ -58,6 +58,15 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Name region landmarks with `aria-labelledby`, not `aria-label`.** A `<section>` is only a landmark when it has an accessible name; point `aria-labelledby` at the section's heading. In Bricks, give that heading an explicit id via its **`_cssId`** setting (Bricks does NOT auto-output element ids), then reference it. Don't add a redundant `aria-label` where a visible heading already names the region — no ARIA beats bad ARIA.
 - **Images: set `alt` intentionally** — decorative / illustrative-beside-a-heading → `alt=""` (don't duplicate the heading); informative → a concise, meaningful `alt`.
 - **Quotations → `<figure>` + `<blockquote>` + `<figcaption>`** for the attribution (`<cite>` is for a *work's* title, not a person's name).
+- **Accessible names for repeated lists/regions:** when several similar lists or regions exist, give each an accessible name with **`aria-labelledby`** → its heading (preferred over a literal `aria-label`). A card `<ul>` labelled by its section heading then announces as e.g. "Services, list, 3 items".
+- **First rule of ARIA — prefer native HTML.** Only reach for ARIA when no native element/attribute conveys the meaning; never add a `role` that just duplicates an element's native role, and don't override native semantics.
+- **Every control needs an accessible name** — icon-only buttons/links get `aria-label` or visually-hidden text; link/button text must make sense out of context (no "click here"); avoid `href="#"` placeholders in production.
+- **One `<h1>` per page; never skip heading levels** (h1 → h2 → h3 …).
+- **Visible focus** — never strip focus outlines without a replacement; ensure a clear `:focus-visible` indicator (≥ 3:1 contrast) on every interactive element.
+- **Decorative icons / SVGs** → `aria-hidden="true"`; meaningful ones get an accessible name (`<title>` / `aria-label`).
+- **Never convey meaning by colour alone** — pair with text, icon, or shape. Non-text contrast (UI components / icons / focus indicators) ≥ 3:1.
+- **Respect `prefers-reduced-motion`** — BRXProd ships a reduced-motion override in the Theme CSS; don't add motion that ignores it.
+- **Forms (when added):** every field has a programmatic `<label>`; group related fields with `<fieldset>`/`<legend>`; convey validation errors as text + `aria-describedby`, not colour alone.
 
 ### Bricks styling
 - **Always use the discovered Bricks variables and classes (see the reference below) — never hard-coded/fixed values** (no literal hex, px, rem where a token exists).
