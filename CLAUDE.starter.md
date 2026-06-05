@@ -99,6 +99,18 @@ Every Bricks element's **label** is derived from its class so the structure pane
 - **Comments** may be appended to any label inside `()`, `[]`, or `{}` — e.g. `NM TESTIMONIALS (rail-full)`, `BTN (primary)`, `GRID [auto-fit]`.
 - Structural wrappers with **no** BEM class (e.g. a rails-parent Section) take a **comment-only** label — e.g. `(Hero)`, `(Testimonials)`.
 
+### Bricks internals reference (discovered)
+Useful when configuring Bricks through the Novamira abilities / data layer:
+- **Custom HTML tags:** to render a non-default tag on a Block or Text element, set `tag: "custom"` + `customTag: "ul" | "li" | "blockquote" | "cite" | "article" | …`. (Heading elements take `tag: "h1"…"h6"` directly.) This is how the "correct semantics" rule above is actually applied in the element tree.
+- **Theme Style settings nest by group key** — e.g. `settings.typography.*`, `settings.section.*`, `settings.general.*`, `settings.css.*`. Key map for common targets:
+  - **Site/Page background** → `general.siteBackground` (`{color:{raw}}`); Bricks outputs it to the **`html`** element (whole-page background).
+  - **Body text colour** → `typography.typographyBody.color` (`{raw}`); **all headings** → `typography.typographyHeadings.color` (`{raw}`); per-heading → `typographyHeadingH1…H6`.
+  - **Theme CSS** (the editable site-wide custom CSS, where the `BRXP_LAYOUT_RAILS` block lives) → `settings.css.stylesheet`. Append to it; never overwrite.
+- **Page Settings → General → "CSS classes"** → key **`bodyClasses`**, applied to the page's **`<body>`** tag (not `#brx-content`). Page-level backgrounds: `siteBackground` (page, on `html`) / `contentBackground` (`#brx-content`).
+- **CSS loading mode** → option `bricks_css_loading_method`: unset/`inline` = styles emitted at render (no regeneration needed after data-layer edits); `file` = external files that must be regenerated after off-builder changes.
+- **Section striping recipe:** add a toggle class to the page via `bodyClasses`, then stripe in Theme CSS — `.<class> section:nth-of-type(even) { background-color: var(--brxp-surface-t-1); }`.
+- ⚠️ **Builder-reload caveat:** data-layer edits (page settings, theme styles, global classes, content) made **while the Bricks builder is open** do NOT appear until the builder is **reloaded** — and **saving from a stale builder session overwrites them**. After any data-layer change, reload the builder (or verify on the frontend) before editing in-builder. The builder canvas also may not apply page `bodyClasses` (those target the real frontend `<body>`), so verify body-class / striping behaviour on the **frontend**, not the builder.
+
 ### Safety & workflow
 - ⚠️ **WP Reset is active on this site.** Never trigger resets or run destructive WP-CLI / SQL / bulk-delete operations.
 - **Verify via Novamira read-backs** — after a write (content, settings, classes), read it back to confirm; don't assume success.
