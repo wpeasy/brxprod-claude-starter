@@ -77,6 +77,8 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 ### Bricks styling
 - **Always use the discovered Bricks variables and classes (see the reference below) — never hard-coded/fixed values** (no literal hex, px, rem where a token exists).
 - **Snap to the scales** — size with `brxw-space-*` (spacing/gaps), `brxw-text-*` (type), `brxw-radius-*` (corners), and `brxw-grid-*` (columns) rather than arbitrary values; choose the nearest scale step instead of a custom one.
+- **`-m` is the default step.** When there's no specific design reason for another size, default to the `-m` variant — `var(--brxw-text-m)` (type), `var(--brxw-space-m)` (spacing), `var(--brxw-radius-m)` (corners). Default element corner radius = `var(--brxw-radius-m)`.
+- **Content padding & gaps → `var(--brxw-content-gap)`.** Use it for padding and the gap between content inside a component rather than hand-picking a `space-*` step. (Section/band spacing comes from the rails + section theme padding; grid *track* gaps use `var(--brxw-grid-gap)`.)
 - **Prefer semantic colors** (`brxp-primary/secondary/tertiary/surface` + `info/success/warning/danger` and their `-l-*/-d-*` ramps) for brand UI; reserve the `brxw-color-neutral-*` ramp for neutral surfaces/borders/text.
 - **Accessible text colors (A11Y pairing):** every *solid* `brxp` color variant has a matching accessible text-color variable for use as the foreground when that color is the **background**. Build the name by inserting `ally-` after `brxp-` and appending `-text`:
   - `--brxp-primary` → text `--brxp-ally-primary-text`
