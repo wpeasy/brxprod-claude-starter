@@ -52,7 +52,12 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 ### HTML semantics & accessibility
 - **Lists are always lists.** Any list of items uses `<ul>`/`<ol>` + `<li>` — never a stack of `<div>`s. (Card grids, nav, feature lists, testimonial sets, etc.)
 - **Always consider accessibility best practices** — logical heading order, landmarks, `alt` text, form labels, visible focus states, keyboard operability, sufficient contrast (see the A11Y color pairing), and ARIA only when native semantics can't express it.
-- **Always use the most correct HTML semantics for the meaning** — e.g. a self-contained card → `<article>`; a quotation → `<blockquote>` (+ `<cite>`/`<figcaption>`); an image-with-caption → `<figure>`; page regions → `<section>`/`<header>`/`<footer>`/`<nav>`/`<main>`; a real action → `<button>`, a navigation → `<a>`. Set the element's tag in Bricks accordingly rather than defaulting everything to `<div>`.
+- **Use the most correct element for the meaning** — page regions → `<section>`/`<header>`/`<footer>`/`<nav>`/`<main>`; an image-with-caption → `<figure>`/`<figcaption>`; a real action → `<button>`, a navigation → `<a>`. Set the tag in Bricks (`tag: "custom"` + `customTag`) rather than defaulting to `<div>`.
+- **Cards: a grid of cards is a list** → `<ul>` + `<li>`. If each card is *self-contained content* (a product/service card, post teaser) nest an `<article>` inside the `<li>` (`<ul><li><article>`); short feature/label items stay a plain `<li>` (no `<article>`). Reserve a standalone `<article>` for non-list contexts.
+- **De-styled lists need `role="list"`.** Any list with `list-style: none` gets `role="list"` on the `<ul>`/`<ol>` — Safari + VoiceOver drop list semantics otherwise.
+- **Name region landmarks with `aria-labelledby`, not `aria-label`.** A `<section>` is only a landmark when it has an accessible name; point `aria-labelledby` at the section's heading. In Bricks, give that heading an explicit id via its **`_cssId`** setting (Bricks does NOT auto-output element ids), then reference it. Don't add a redundant `aria-label` where a visible heading already names the region — no ARIA beats bad ARIA.
+- **Images: set `alt` intentionally** — decorative / illustrative-beside-a-heading → `alt=""` (don't duplicate the heading); informative → a concise, meaningful `alt`.
+- **Quotations → `<figure>` + `<blockquote>` + `<figcaption>`** for the attribution (`<cite>` is for a *work's* title, not a person's name).
 
 ### Bricks styling
 - **Always use the discovered Bricks variables and classes (see the reference below) — never hard-coded/fixed values** (no literal hex, px, rem where a token exists).
@@ -104,6 +109,8 @@ Every Bricks element's **label** is derived from its class so the structure pane
 ### Bricks internals reference (discovered)
 Useful when configuring Bricks through the Novamira abilities / data layer:
 - **Custom HTML tags:** to render a non-default tag on a Block or Text element, set `tag: "custom"` + `customTag: "ul" | "li" | "blockquote" | "cite" | "article" | …`. (Heading elements take `tag: "h1"…"h6"` directly.) This is how the "correct semantics" rule above is actually applied in the element tree.
+- **Element IDs & attributes:** Bricks does **not** output an HTML `id` on elements by default — set one via the element's **`_cssId`** setting when you need a stable target (`aria-labelledby`, in-page anchors). Arbitrary HTML attributes go in **`_attributes`** = `[{id, name, value}]` (e.g. `role="list"`, `aria-labelledby`).
+- **`<main>` + skip link are built in:** Bricks wraps page content in `<main id="brx-content">` and outputs a "Skip to main content" link — put primary content there; never add a second `<main>`.
 - **Theme Style settings nest by group key** — e.g. `settings.typography.*`, `settings.section.*`, `settings.general.*`, `settings.css.*`. Key map for common targets:
   - **Site/Page background** → `general.siteBackground` (`{color:{raw}}`); Bricks outputs it to the **`html`** element (whole-page background).
   - **Body text colour** → `typography.typographyBody.color` (`{raw}`); **all headings** → `typography.typographyHeadings.color` (`{raw}`); per-heading → `typographyHeadingH1…H6`.
