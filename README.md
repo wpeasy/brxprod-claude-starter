@@ -8,7 +8,8 @@ It gives Claude a consistent set of conventions (styling, naming, semantics, acc
 
 | File | Purpose |
 |---|---|
-| `CLAUDE.starter.md` | The project guidance template. Copy to a site as `CLAUDE.md`, fill the placeholders, then run the skill. |
+| `.claude/skills/init-brxprod/SKILL.md` | **Project-level** Claude Code skill — `/init-brxprod` — the one-command bootstrap. Tailors `CLAUDE.md` from your answers, detects the OS, installs the skills below at **user or project** level, lists them, and explains how to connect Novamira. Start here. (Named `init-brxprod` so it doesn't clash with Claude Code's built-in `/init`.) |
+| `CLAUDE.starter.md` | The project guidance template. Copy to a site as `CLAUDE.md`, fill the placeholders, then run the skill. (`/init` does this for you.) |
 | `skills/bricks-design-tokens/SKILL.md` | A user-level Claude Code skill that reads a site's Bricks global **variables** and **classes** (`brxw-*` / `brxp-*`, `-fluid` excluded) and writes the "Design System reference" section into that site's `CLAUDE.md`. |
 | `skills/add-overlay/SKILL.md` | A user-level Claude Code skill — `/add-overlay .class-name` or `/add-overlay #id` — that **merges** the standard dark-overlay scrim (relative + isolation + a `-100` z-index `::before`) onto a Bricks global class or element id, without clobbering existing CSS. Pairs with the `brxp-has-bg-media` background-image pattern. |
 | `skills/init-bricks/SKILL.md` | A user-level Claude Code skill — `/init-bricks` — that asks for the site **background**, default **body text**, and default **heading** colours (favouring `brxw-`/`brxp-` tokens) and writes them to the active Bricks **Theme Style** (`general.siteBackground`, `typography.typographyBody.color`, `typography.typographyHeadings.color`). |
@@ -23,11 +24,23 @@ It gives Claude a consistent set of conventions (styling, naming, semantics, acc
 
 ## Bootstrap a new site
 
-1. **Install the skill once** (user-level, shared across all projects):
+### Fastest path — `/init-brxprod`
+
+1. **Copy this starter** into your new project (keep `.claude/skills/init-brxprod/`, `skills/`, `CLAUDE.starter.md`, and `PROFORMS.md`).
+2. Open the project in Claude Code and run:
    ```
-   cp -r skills/bricks-design-tokens ~/.claude/skills/
+   /init-brxprod
    ```
-   (Windows: copy `skills\bricks-design-tokens` into `%USERPROFILE%\.claude\skills\`.)
+   It asks the setup questions and tailors `CLAUDE.md`, detects your OS, installs the skills at **user or project** level (your choice), lists them, and walks you through connecting Novamira.
+3. **Connect Novamira** (the one manual step `/init-brxprod` can't do for you), **reload**, then run `/bricks-design-tokens` — and optionally `/init-bricks` — as prompted.
+
+### Manual path
+
+1. **Install the skills** (user-level, shared across all projects):
+   ```
+   cp -r skills/bricks-design-tokens skills/add-overlay skills/add-pattern skills/init-bricks ~/.claude/skills/
+   ```
+   (Windows: copy those folders into `%USERPROFILE%\.claude\skills\`.)
 2. **Add the project guidance:** copy `CLAUDE.starter.md` into the site's project root as `CLAUDE.md`.
 3. **Tailor it** — follow the "How to use this starter" block at the top of the file:
    - replace `<MCP_SERVER_NAME>` with the site's Novamira MCP server name;
