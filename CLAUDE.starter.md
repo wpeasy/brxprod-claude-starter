@@ -114,6 +114,27 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 ```
 - **Layout Rails is our preferred OUTER-layout system** — use it for section/page-level horizontal structure (which band a block occupies + page gutters), not for laying out content inside a band (use flex/`auto-fit` grids for that). The **parent/outer container must have the `.brxp-rails` class** (that's where the grid + band names live); then prefer applying bands/gutters to its **direct children** via **named grid lines + variables on our BEM classes** (`grid-column-start/-end`, `padding-inline-start/-end: var(--brxp-page-gutter)`) over the `.brxp-rail-*` / `.brxp-gutter-*` convenience utilities. See the **Layout Rails** section below.
 
+#### Corner utilities — inverted & outset radius (BRXProd → Wireframes Tools → Corners)
+BRXProd ships **16 framework corner utility classes** (Bricks globals). The classes are intentionally **empty** — their CSS lives in the **Theme CSS** inside locked markers (`/* BRXP_INVERTED_RADIUS_START…END */`, `/* BRXP_OUTSET_RADIUS_START…END */`). **Never edit those blocks** (same rule as the rails block); **apply the classes directly** (like `brxp-rails`), never recreate them.
+
+- **Inverted radius** = a concave **scoop cut *into*** the corner → `brxp-inverted-radius-{corner}-{axis}`.
+- **Outset radius** = a concave **fillet that flares *outside*** the corner (curves away and bites into the parent — the "tab/flag" join) → `brxp-outset-radius-{corner}-{axis}`.
+- `{corner}` = `top-left | top-right | bottom-left | bottom-right`; `{axis}` = `horizontal | vertical`.
+
+**`-horizontal` / `-vertical` selects the pseudo-element slot** (`horizontal → ::before`, `vertical → ::after`). This exists so you can **stack two corners on one element by pairing one `-horizontal` class with one `-vertical` class**; two of the *same* axis collide on one pseudo and only one renders. (*Inverted:* the two axes look identical per corner — slot only. *Outset:* `-horizontal` flares sideways, `-vertical` flares up/down.)
+
+**Control via CSS custom properties** — set them on the element (or an ancestor). They're declared at `:root` and applied via `:where()` (0,0,0 specificity) so your overrides always win. ⚠️ These live in the **Theme CSS `:root`, not the Bricks variables store**, so the `bricks-design-tokens` skill does **not** list them — they are:
+- `--inverted-radius` — scoop size (default `var(--brxw-radius-m, 12px)`).
+- `--inverted-color` — **set to the surrounding/parent background colour** (default `red`, deliberately loud as a reminder).
+- `--outset-radius` — fillet size (default `var(--brxw-radius-m, 12px)`).
+- `--outset-color` — **set to the element's own background colour** (default `var(--brxw-color-neutral-25, white)`).
+
+**Usage rules:**
+- Size with `--inverted-radius` / `--outset-radius` (prefer `brxw-radius-*` tokens); set the colour var to the correct adjoining surface (prefer a `brxp`/`brxw` colour token).
+- **Colour-match gotcha:** the fallback path fakes the corner with a *solid colour*, so you MUST set the matching colour var (inverted → **parent** bg, outset → **element** bg) or the loud default shows.
+- **Rendering paths:** *inverted* upgrades to native `corner-shape: scoop` via `@supports` (Chrome 139+) using the element's real background (no colour var needed, pseudo hidden); older browsers — and **all** *outset* — use a pseudo-element + `radial-gradient` fallback.
+- Apply only where a scoop/flare genuinely fits (per the one-global-class / utility-class rules).
+
 ### Bricks build conventions
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.
 - **Reusable UI → Bricks components** (or global classes for pure styling); don't copy-paste element trees.
