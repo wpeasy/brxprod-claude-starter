@@ -135,6 +135,15 @@ BRXProd ships **16 framework corner utility classes** (Bricks globals). The clas
 - **Rendering paths:** *inverted* upgrades to native `corner-shape: scoop` via `@supports` (Chrome 139+) using the element's real background (no colour var needed, pseudo hidden); older browsers — and **all** *outset* — use a pseudo-element + `radial-gradient` fallback.
 - Apply only where a scoop/flare genuinely fits (per the one-global-class / utility-class rules).
 
+**Reading a corner from a design → which class:**
+- **Convex** arc, the element's own colour, corner shaved off → plain **`border-radius`** (no utility).
+- **Concave** arc revealing the **surrounding/parent colour** → **inverted *or* outset**. ⚠️ Both look like "surrounding colour in a concave bite", so that alone does **not** distinguish them — tell them apart by the element's **footprint**:
+  - the bite is **inside** the element's rectangle (corner eaten away, element stays within its box) → **inverted** (scoop).
+  - the element's colour **extends beyond** its rectangle into the neighbour, concave where it rejoins → **outset** (flare / tab).
+- **The colour var references opposite surfaces:** inverted → `--inverted-color` = the **surrounding/parent** bg (it fakes the revealed parent in the bite); outset → `--outset-color` = the **element's own** bg (the part that flares; the bite is real transparency).
+- **Then read corner + axis from the actual pixels — don't assume** (e.g. a tab joins where its curve actually is, not "at the bottom"): `{corner}` = where the curve sits; outset `{axis}` = which way the colour spills past the box (**sideways → `-horizontal`**, **up/down → `-vertical`**).
+- A single element can **mix** treatments (e.g. an outset `top-left-horizontal` flare + plain `border-radius` on another corner). Zoom in and verify on the real render, not the assumption.
+
 ### Bricks build conventions
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.
 - **Reusable UI → Bricks components** (or global classes for pure styling); don't copy-paste element trees.
