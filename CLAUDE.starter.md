@@ -114,6 +114,18 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 ```
 - **Layout Rails is our preferred OUTER-layout system** — use it for section/page-level horizontal structure (which band a block occupies + page gutters), not for laying out content inside a band (use flex/`auto-fit` grids for that). The **parent/outer container must have the `.brxp-rails` class** (that's where the grid + band names live); then prefer applying bands/gutters to its **direct children** via **named grid lines + variables on our BEM classes** (`grid-column-start/-end`, `padding-inline-start/-end: var(--brxp-page-gutter)`) over the `.brxp-rail-*` / `.brxp-gutter-*` convenience utilities. See the **Layout Rails** section below.
 
+- **Variablize a block's "settings".** On a BEM block's root, declare a `/* Settings */` group of **private `--_<block>-*`** custom properties, each reading a **public overridable `--<block>-*`** var with a token fallback; the block's element classes then consume the **private** vars (custom properties inherit to descendants). Put here anything reused across elements or that a consumer might want to override (radii, key colours, gaps, sizes). Re-theme the whole block by setting the public var on the block (or an ancestor) — no element CSS to touch:
+```css
+/* Settings */
+%root% {
+  --_nm-feature-radius: var(--nm-feature-radius, var(--brxw-radius-2xl));
+  --_nm-feature-panel-bg: var(--nm-feature-panel-bg, var(--brxp-surface-l-9));
+  --_nm-feature-panel-text: var(--nm-feature-panel-text, var(--brxp-ally-surface-l-9-text));
+}
+/* element class elsewhere */
+%root% { background: var(--_nm-feature-panel-bg); color: var(--_nm-feature-panel-text); }
+```
+
 #### Corner utilities — inverted & outset radius (BRXProd → Wireframes Tools → Corners)
 BRXProd ships **16 framework corner utility classes** (Bricks globals). The classes are intentionally **empty** — their CSS lives in the **Theme CSS** inside locked markers (`/* BRXP_INVERTED_RADIUS_START…END */`, `/* BRXP_OUTSET_RADIUS_START…END */`). **Never edit those blocks** (same rule as the rails block); **apply the classes directly** (like `brxp-rails`), never recreate them.
 
@@ -143,6 +155,17 @@ BRXProd ships **16 framework corner utility classes** (Bricks globals). The clas
 - **The colour var references opposite surfaces:** inverted → `--inverted-color` = the **surrounding/parent** bg (it fakes the revealed parent in the bite); outset → `--outset-color` = the **element's own** bg (the part that flares; the bite is real transparency).
 - **Then read corner + axis from the actual pixels — don't assume** (e.g. a tab joins where its curve actually is, not "at the bottom"): `{corner}` = where the curve sits; outset `{axis}` = which way the colour spills past the box (**sideways → `-horizontal`**, **up/down → `-vertical`**).
 - A single element can **mix** treatments (e.g. an outset `top-left-horizontal` flare + plain `border-radius` on another corner). Zoom in and verify on the real render, not the assumption.
+
+#### Complex / overlapping layouts (grid + inverted/outset corners)
+For non-trivial layouts — overlapping panels, cards that straddle a panel edge, "notched" joins — reach for an **explicit CSS grid**, not flex + negative margins:
+- **One grid, flat siblings.** Make the block a grid (e.g. `grid-template-columns: repeat(12, 1fr)`) and place each region as a **direct child** via `grid-column` / `grid-row`. Regions must be **siblings** in the same grid to overlap — don't bury them in wrappers.
+- **Overlap by sharing a track, not by negative margins.** Put the overlapping element in the **same row** as what it overlaps and pull it with **`align-self: end`** (or `start`). Reserve negative margins for cases grid genuinely can't express.
+- **Full-height panels + an overlapping wrapper.** Side-by-side panels span all rows (equal height) via `grid-row`; a wrapper coloured the **same as the page** (`brxp-surface-l-10`), with padding, overlaps their bottom and holds the cards.
+- **A "notch" where a wrapper meets a panel is an OUTSET radius on the *wrapper*** (the flaring element) — NOT a radius/scoop on the panel. Pair one `-horizontal` + one `-vertical` outset for two corners (different pseudo slots); set `--outset-color` to the **wrapper's own bg**; and **zero the `border-radius` on the flaring corners** so the flare reads cleanly.
+- **Reading a join:** convex corner → standard `border-radius`; concave revealing the surrounding colour → inverted *or* outset (eaten-in vs flared-out). A wrapper that overlaps a panel and "cuts into" it → **outset on the wrapper**.
+- **Responsive (`@container` + `:has()`):** to stack, collapse the grid to one column and **flip which corners round** so stacked panels read as one rounded rectangle (top panel: round top, square bottom; bottom panel: square top, round bottom; `row-gap: 0`). Keep the underlying track grid (e.g. 12-col) if an overlapping child still needs to span a *fraction* of the width.
+- **Cross-class `@container` overrides must out-specify the base** (`.block .block__el`, not `.block__el`) — `@container` adds no specificity, so an equal-specificity base rule living in *another* class can win on source order.
+- **Build from the real render.** Read the actual pixels (which corner, which way the curve opens), verify on the frontend, and iterate — don't infer geometry from an assumed model.
 
 ### Bricks build conventions
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.
