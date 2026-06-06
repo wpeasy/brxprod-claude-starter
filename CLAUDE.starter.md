@@ -149,6 +149,25 @@ BRXProd ships **16 framework corner utility classes** (Bricks globals). The clas
 - **Set the control vars in the block's `/* Settings */` group, not inline on the element.** When a block uses corner utilities, declare `--inverted-radius` / `--outset-radius` (and `--inverted-color` / `--outset-color`) on the **block root**, tied to the block's own settings (e.g. `--outset-radius: var(--_nm-feature-radius); --outset-color: var(--_nm-feature-bg);`). They inherit to the utility elements, stay in sync with the block, and re-theme with it.
 - Apply only where a scoop/flare genuinely fits (per the one-global-class / utility-class rules).
 
+**Verified effect lookup** (don't guess the axis/direction — read it off here). Build a labelled **Corner Radius Reference** page once per site (a 16-tile grid: a coloured card on a contrasting panel with each utility applied + a caption) to confirm these visually:
+
+| Class | Slot | Effect |
+|---|---|---|
+| `brxp-outset-radius-top-left-horizontal` | `::before` | flares **LEFT** |
+| `brxp-outset-radius-top-left-vertical` | `::after` | flares **UP** |
+| `brxp-outset-radius-top-right-horizontal` | `::before` | flares **RIGHT** |
+| `brxp-outset-radius-top-right-vertical` | `::after` | flares **UP** |
+| `brxp-outset-radius-bottom-left-horizontal` | `::before` | flares **LEFT** |
+| `brxp-outset-radius-bottom-left-vertical` | `::after` | flares **DOWN** |
+| `brxp-outset-radius-bottom-right-horizontal` | `::before` | flares **RIGHT** |
+| `brxp-outset-radius-bottom-right-vertical` | `::after` | flares **DOWN** |
+| `brxp-inverted-radius-{corner}-horizontal` | `::before` | **scoop** cut into that corner |
+| `brxp-inverted-radius-{corner}-vertical` | `::after` | **scoop** cut into that corner (looks identical to `-horizontal`) |
+
+- **Outset rule of thumb:** `-horizontal` flares toward the corner's **side** edge (left for left-corners, right for right-corners); `-vertical` flares toward its **top/bottom** edge (up for top-corners, down for bottom-corners). The axis = *which way the fillet flares*.
+- **Inverted:** the scoop is symmetric, so the two axes render **identically** — axis only chooses the pseudo **slot** (`::before` vs `::after`), so you can pair one `-horizontal` + one `-vertical` to put **two** scoops on one element. (Same slot ×2 collides — only one renders.)
+- **Max two corners per element** (`::before` + `::after`). For a *third* outset/inverted corner you need an **extra element** (e.g. an absolutely-positioned child) with its own utility class — or, for an *inner* corner, a plain convex `border-radius` (doesn't consume a pseudo slot, usually reads the same when a panel wraps it). The element box's own `border-radius` composes freely with the two pseudo corners.
+
 **Reading a corner from a design → which class:**
 - **Convex** arc, the element's own colour, corner shaved off → plain **`border-radius`** (no utility).
 - **Concave** arc revealing the **surrounding/parent colour** → **inverted *or* outset**. ⚠️ Both look like "surrounding colour in a concave bite", so that alone does **not** distinguish them — tell them apart by the element's **footprint**:
