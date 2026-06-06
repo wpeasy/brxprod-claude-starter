@@ -9,16 +9,16 @@ Ensure the given selector carries the standard decorative pattern layer. **Merge
 
 ## Input
 `args` = a single selector:
-- **`.class-name`** → a Bricks **global class** named `class-name`. CSS is authored on the class with `%root%`.
+- **`.class-name`** → a Bricks **global class** named `class-name`. CSS is authored on the class (`_cssCustom`) using the **literal `.class-name`** selector — NOT `%root%` (see Notes).
 - **`#id`** → an element id. CSS goes in the **Theme CSS** (`settings.css.stylesheet`) targeting `#id`.
 
 If `args` is empty, or not prefixed with `.` or `#`, ask the user for the selector before doing anything.
 
 ## The pattern rules
-With `SEL` = `%root%` (for a global class) or the literal `#id`:
+With `SEL` = the **literal `.class-name`** (for a global class) or the literal `#id` — **never `%root%`** for data-layer writes (see Notes):
 
 ```css
-%root% {
+SEL {
   position: relative;
   isolation: isolate;
 
@@ -43,7 +43,7 @@ With `SEL` = `%root%` (for a global class) or the literal `#id`:
 }
 ```
 
-For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nesting stays).
+Replace `SEL` with the **literal selector**: `.class-name` for a global class, or `#id` for an element id (the `&::after` nesting stays). Do **not** write `%root%` via the data layer — it won't apply on the frontend.
 
 ### About this block
 - `position: relative` + `isolation: isolate` give `SEL` its own stacking context; the `::after` at `z-index: -50` sits **behind the content** but **above** an `add-overlay` `::before` (`-100`) and a `brxp-has-bg-media__media` image (`-1000`). Layering (back → front): **bg image (-1000) → overlay scrim (-100) → pattern (-50) → content**.
@@ -60,7 +60,7 @@ For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nest
    - **Existing `SEL` rule** → add `position: relative;` *only if* no `position` declaration is present, and `isolation: isolate;` *only if* absent; then add the `&::after { … }` (class) / `SEL::after { … }` (id) **only if `SEL` has no `::after` yet**. If a *different* `::after` already exists, **stop and ask the user** — never overwrite an existing pseudo-element.
    - Leave every other existing declaration untouched. **Idempotent:** if an `@abp-pattern` marker (or the `z-index: -50` `::after`) is already on `SEL`, report "already present" and change nothing.
 5. **Write back:**
-   - class → `novamira/bricks-edit-global-class` with the merged `settings._cssCustom` (author with `%root%`, native `&::after` nesting, pretty-printed; comments preserved). If the class is missing, create it with `novamira/bricks-create-global-class`.
+   - class → `novamira/bricks-edit-global-class` with the merged `settings._cssCustom` (author the **literal `.class-name`** selector — NOT `%root%`, native `&::after` nesting, pretty-printed; comments preserved). If the class is missing, create it with `novamira/bricks-create-global-class`.
    - id → set the merged `settings.css.stylesheet`. **Append outside** the `/* BRXP_LAYOUT_RAILS_* */` locked block — never edit inside it. The stylesheet is large, so an `execute-php` read-modify-write is usually simplest (or pass the full merged string to `bricks-edit-theme-style`).
 6. **Verify** via read-back that the rule is present (and on the frontend if useful — the `SEL` rule + the pattern `background-image` / `mask-image`), then report what was **added** vs. **already present**.
 
@@ -71,5 +71,5 @@ For an `#id`, swap the outer `%root%` for the literal `#id` (the `&::after` nest
 - Follow the project's `CLAUDE.md` conventions.
 - The pattern's shape/colours are a **default placeholder** from the generator (a 20px grid in `hsl(238,10%,95%)` ≈ `var(--brxp-surface-l-10)`, faded by a radial mask). To restyle, regenerate the pattern or edit the block — prefer `brxw-`/`brxp-` tokens where practical, and keep the `@abp-*` markers so it stays editable.
 - **Pairs with `brxp-has-bg-media`:** apply to the same container that has the background image; the pattern lands just behind the content.
-- **`%root%` vs class name:** author new CSS with `%root%`, but Bricks **persists the literal class selector** (e.g. `.nm-faq { … }`) and only shows `%root%` in the builder (transposing back on save). On **read-back, expect the literal** — detect the existing rule / `::after` against `.class-name`, not `%root%`, and merge into whichever root form is already stored (don't rewrite it).
+- ⚠️ **Author the literal `.class-name`, never `%root%`.** Bricks' **frontend CSS generator does NOT resolve `%root%`** for data-layer writes — a `%root%`-rooted `_cssCustom` emits verbatim and **won't apply on the frontend** until the class is re-saved in the builder. So write `.nm-card { … }` / `.nm-card::after { … }`. The builder still shows it as `%root%` and round-trips fine. On **read-back, expect the literal** — detect the existing rule / `::after` against `.class-name` and merge into the stored literal root.
 - **Builder-reload caveat:** data-layer edits won't appear in an already-open Bricks builder until it's reloaded — verify on the frontend.
