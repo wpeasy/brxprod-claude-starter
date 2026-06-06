@@ -145,6 +145,7 @@ BRXProd ships **16 framework corner utility classes** (Bricks globals). The clas
 - Size with `--inverted-radius` / `--outset-radius` (prefer `brxw-radius-*` tokens); set the colour var to the correct adjoining surface (prefer a `brxp`/`brxw` colour token).
 - **Colour-match gotcha:** the fallback path fakes the corner with a *solid colour*, so you MUST set the matching colour var (inverted → **parent** bg, outset → **element** bg) or the loud default shows.
 - **Rendering paths:** *inverted* upgrades to native `corner-shape: scoop` via `@supports` (Chrome 139+) using the element's real background (no colour var needed, pseudo hidden); older browsers — and **all** *outset* — use a pseudo-element + `radial-gradient` fallback.
+- **Set the control vars in the block's `/* Settings */` group, not inline on the element.** When a block uses corner utilities, declare `--inverted-radius` / `--outset-radius` (and `--inverted-color` / `--outset-color`) on the **block root**, tied to the block's own settings (e.g. `--outset-radius: var(--_nm-feature-radius); --outset-color: var(--_nm-feature-bg);`). They inherit to the utility elements, stay in sync with the block, and re-theme with it.
 - Apply only where a scoop/flare genuinely fits (per the one-global-class / utility-class rules).
 
 **Reading a corner from a design → which class:**
