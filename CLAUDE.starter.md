@@ -62,6 +62,8 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Always consider accessibility best practices** — logical heading order, landmarks, `alt` text, form labels, visible focus states, keyboard operability, sufficient contrast (see the A11Y color pairing), and ARIA only when native semantics can't express it.
 - **Use the most correct element for the meaning** — page regions → `<section>`/`<header>`/`<footer>`/`<nav>`/`<main>`; an image-with-caption → `<figure>`/`<figcaption>`; a real action → `<button>`, a navigation → `<a>`. Set the tag in Bricks (`tag: "custom"` + `customTag`) rather than defaulting to `<div>`.
 - **Cards: a grid of cards is a list** → `<ul>` + `<li>`. If each card is *self-contained content* (a product/service card, post teaser) nest an `<article>` inside the `<li>` (`<ul><li><article>`); short feature/label items stay a plain `<li>` (no `<article>`). Reserve a standalone `<article>` for non-list contexts.
+- **A content `<article>` card is structured `<header>` / body / `<footer>`** — identity (title + meta) in `<header>`, the substance (text/excerpt) in the body, and any call‑to‑action / link in `<footer>`. Don't dump the card's children flat in the article. (In Bricks, set each via `tag: "custom"` + `customTag`.)
+- **A card's image goes LAST in source order, positioned visually with CSS** (`order` / grid placement) — so screen‑reader/keyboard reading order is *content first, decorative image last*. The headshot/teaser image beside a heading is **illustrative → `alt=""`** (don't repeat the name). (This generalises the `brxp-has-bg-media` "media last" rule to content cards.)
 - **De-styled lists need `role="list"`.** Any list with `list-style: none` gets `role="list"` on the `<ul>`/`<ol>` — Safari + VoiceOver drop list semantics otherwise.
 - **Name region landmarks with `aria-labelledby`, not `aria-label`.** A `<section>` is only a landmark when it has an accessible name; point `aria-labelledby` at the section's heading. In Bricks, give that heading an explicit id via its **`_cssId`** setting (Bricks does NOT auto-output element ids), then reference it. Don't add a redundant `aria-label` where a visible heading already names the region — no ARIA beats bad ARIA.
 - **Images: set `alt` intentionally** — decorative / illustrative-beside-a-heading → `alt=""` (don't duplicate the heading); informative → a concise, meaningful `alt`.
@@ -194,6 +196,19 @@ For non-trivial layouts — overlapping panels, cards that straddle a panel edge
 - **Responsive (`@container` + `:has()`):** to stack, collapse the grid to one column and **flip which corners round** so stacked panels read as one rounded rectangle (top panel: round top, square bottom; bottom panel: square top, round bottom; `row-gap: 0`). Keep the underlying track grid (e.g. 12-col) if an overlapping child still needs to span a *fraction* of the width.
 - **Cross-class `@container` overrides must out-specify the base** (`.block .block__el`, not `.block__el`) — `@container` adds no specificity, so an equal-specificity base rule living in *another* class can win on source order.
 - **Build from the real render.** Read the actual pixels (which corner, which way the curve opens), verify on the frontend, and iterate — don't infer geometry from an assumed model.
+
+### Build conformance — Definition of Done (MUST verify before claiming a build is complete)
+A page that *renders correctly* is **not** done. Before reporting any Bricks build/edit finished, run the **conformance linter** (`tools/bricks-lint.php` — audits the element tree + global classes against these rules) and **paste a clean PASS**. Building for "it looks right" while skipping these is the failure mode this checklist exists to prevent. The linter mechanically checks:
+- **Every element has a `label`** matching its BEM class — block class → uppercased name minus `nm-` (e.g. `TEAM GRID`); element → the `__segment` (e.g. `CARD`, `CARD HEAD`). Bricks does **not** derive it; the data-layer write must set it.
+- **Every element carries its own `nm-` BEM global class** (one per element, even if empty).
+- **Framework classes (`brxp-*` / `brxw-*`) are applied via `_cssGlobalClasses` (by id), never the plain `_cssClasses` field** — the plain field renders on the frontend but never registers the class in the builder's selector.
+- **`_cssCustom` uses the literal `.class-name` selector, never `%root%`** (frontend generator won't resolve `%root%`).
+- **No raw values where a token exists** — flag literal hex and `px` in `_cssCustom` (allow `0`; flag the rest for token replacement).
+- **List semantics**: a class named `…__list` renders `customTag: ul`/`ol`; `…__item` renders `customTag: li`; a self-contained card renders `customTag: article` with `header`/body/`footer` children; de-styled lists carry `role="list"`.
+- **Landmark sections** (`<section>` with a heading) carry `aria-labelledby` → the heading's `_cssId`.
+- **Images** flagged for manual alt review (decorative/illustrative → `alt=""`; content image last in source order).
+
+Treat a linter failure like a failing test: fix it, re-run, and only then report done.
 
 ### Bricks build conventions
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.

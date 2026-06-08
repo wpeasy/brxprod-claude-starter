@@ -15,6 +15,7 @@ It gives Claude a consistent set of conventions (styling, naming, semantics, acc
 | `skills/init-bricks/SKILL.md` | A user-level Claude Code skill — `/init-bricks` — that asks for the site **background**, default **body text**, and default **heading** colours (favouring `brxw-`/`brxp-` tokens) and writes them to the active Bricks **Theme Style** (`general.siteBackground`, `typography.typographyBody.color`, `typography.typographyHeadings.color`). |
 | `skills/add-pattern/SKILL.md` | A user-level Claude Code skill — `/add-pattern .class-name` or `/add-pattern #id` — that **merges** a decorative background-pattern layer (relative + isolation + a low-opacity `::after` with an SVG pattern + radial mask, `@abp-*` generator metadata preserved) onto a Bricks global class or element id. Sibling of `add-overlay` (`::before` scrim); the two layer together. |
 | `PROFORMS.md` | Conditional companion doc — the **Bricksforge Pro Forms** build playbook. `CLAUDE.md` instructs reading it only when Pro Forms is active; copy it alongside `CLAUDE.md` on sites that may use Bricksforge. |
+| `tools/bricks-lint.php` | **Conformance linter** — audits a Bricks page/template element tree + global classes against the `CLAUDE.md` "Definition of Done" (labels, BEM classes, framework‑class application, list/article semantics, `%root%`/raw‑value checks, landmarks). Run via the Novamira `execute-php` ability after any build; report complete only on a clean PASS. |
 
 ## Prerequisites (per site)
 
