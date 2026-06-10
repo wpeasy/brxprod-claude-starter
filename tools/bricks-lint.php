@@ -13,13 +13,14 @@
  * Rules checked (mechanical subset of CLAUDE.md):
  *  - every element has a `label` matching its BEM class (block -> NAME, element -> SEGMENT)
  *  - every element carries its own `nm-` BEM global class
- *  - framework classes (brxp-*/brxw-*) applied via _cssGlobalClasses, not plain _cssClasses
+ *  - framework classes (brxp-* / brxw-*) applied via _cssGlobalClasses, not plain _cssClasses
  *  - _cssCustom uses literal `.class` selectors, never %root%
  *  - no raw hex / px in _cssCustom (px -> warning, hex -> error)
  *  - list semantics: __list -> customTag ul/ol, __item -> li, __card -> article
  *  - <article> cards contain <header> + <footer> children
  *  - <section> landmarks carry aria-labelledby (warning)
  *  - images flagged for manual alt/source-order review (warning)
+ *  - flat element array is depth-first (every parent before its children) — else the builder drops links / copy returns empty
  */
 
 $POST_IDS = [/* e.g. 25, 26 */];
@@ -56,6 +57,17 @@ foreach ($POST_IDS as $pid) {
   $childrenOf = [];
   foreach ($E as $el) { $childrenOf[$el['parent'] ?? 0][] = $el; }
   $errs = []; $warns = []; $seen = [];
+  // Flat array must be depth-first: every parent must appear BEFORE its children.
+  // (Out-of-order makes the Bricks builder drop the parent->child link — the element
+  //  then shows no children and copy/paste returns empty content.)
+  $seenInOrder = [];
+  foreach ($E as $el) {
+    $p = $el['parent'] ?? 0;
+    if ($p !== 0 && $p !== '0' && empty($seenInOrder[$p])) {
+      $errs[] = "[{$el['name']}#{$el['id']}] flat-array order: parent '$p' appears AFTER this element — the element array must be depth-first (parent before children), else the builder drops the link (no children / empty copy)";
+    }
+    $seenInOrder[$el['id']] = true;
+  }
   foreach ($E as $el) {
     $id = $el['id']; $name = $el['name']; $s = $el['settings'] ?? [];
     $where = "[$name#$id" . (isset($el['label']) ? " \"{$el['label']}\"" : '') . ']';
