@@ -42,6 +42,15 @@ window.nmShaders.count;     // number of shader canvases tracked
 
 The paused state is stored in `localStorage`, so it **persists across builder reloads** — pause once while editing and it stays paused until you `resume()`. It's per-browser (affects only your machine, not visitors). In the builder canvas a one-line console hint reminds you the control exists.
 
+### Builder toolbar button (optional)
+
+A small Fluent Snippet (**builder-only**, gated to `?bricks=run`) adds a Pause/Resume icon as the **last `<li>` in the Bricks toolbar's `ul.group-wrapper.start`**, so you can toggle without opening the console. Recipe:
+
+- **Type PHP, `run_at: wp_footer`, created inactive.** First line guards the context: `if (empty($_GET['bricks']) || $_GET['bricks'] !== 'run') return;` — then it prints an inline `<script>` (builder *chrome*; it never reaches the live frontend).
+- The script waits for `ul.group-wrapper.start` via a `MutationObserver` (the toolbar mounts after page load), then appends one `<li>` styled with the toolbar's `bricks-svg-wrapper` / `bricks-svg` classes + a `data-balloon` tooltip so it matches the native buttons.
+- **Cross-window:** the toolbar is in the builder's *parent* window, but `nmShaders` lives in the **canvas iframe** — reach it via `document.getElementById('bricks-builder-iframe').contentWindow.nmShaders` (fall back to any `iframe` whose `src` matches `bricks_preview`), then call `.pause()` / `.resume()`.
+- **State + icon:** read/write the same `localStorage` key (`nmShadersPaused`). It's the same origin as the iframe, so state stays in sync and survives canvas reloads; swap the icon (pause bars ↔ play triangle) based on that key.
+
 ## The shaders.com MCP (Pro) — getting preset configs
 
 Connect as an HTTP MCP server:
