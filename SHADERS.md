@@ -75,6 +75,16 @@ Authenticate via `/mcp` → `shaders` → Authenticate (OAuth; local callback co
 ### 3. What to paste (tolerant — no JSON conversion)
 Inside the `<script>` (or under a registry slug) you may paste **the whole shaders.com copy verbatim** (`import …` + `createShader(…)`), **just the object** `{ components: […] }` (+ optional options), or **strict JSON**. The runtime strips the `import`, captures the config via a `createShader` shim (incl. 3rd-arg `options` like `{ colorSpace: 'srgb' }`), and mounts it. Keep every component `id`; keep `type="application/json"`.
 
+### 4. Using design-system tokens — CSS `var(--…)` in the config
+Any config value may reference a Bricks/BRXProd token with normal CSS `var()` syntax. The runtime **resolves it against the canvas's computed styles just before mounting**, so the shader tracks the brand palette instead of hardcoded hex:
+```js
+{ id: 'gradient', props: { colorBack: 'var(--brxp-primary)', colorTint: 'var(--brxp-secondary-l-3)' } }
+```
+- **Colours** are normalized to a value the library parses (hex / `rgb()`); **numeric** tokens become numbers; `var(--x, fallback)` and nested-`var()` fallbacks are honoured.
+- Resolved **per (re)mount**, so a re-init (e.g. on viewport resize) re-reads the *current* values. The **source config keeps the `var()` strings** untouched.
+- An unresolvable token (typo / not in scope on the canvas) logs `[nm-shader] unresolved CSS var: …` and falls back to the literal string.
+- **Caveat — read once at mount.** A runtime token change (e.g. a dark-mode toggle) won't update a *live* shader unless a re-init fires. Add a theme-change re-resolve hook if you switch themes at runtime.
+
 ---
 
 ## The WGSL gotcha
