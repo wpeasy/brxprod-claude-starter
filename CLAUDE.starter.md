@@ -71,7 +71,7 @@ Keep *our* code/styles clearly separate from the `brxw-`/`brxp-` framework names
 - **Quotations → `<figure>` + `<blockquote>` + `<figcaption>`** for the attribution (`<cite>` is for a *work's* title, not a person's name).
 - **Accessible names for repeated lists/regions:** when several similar lists or regions exist, give each an accessible name with **`aria-labelledby`** → its heading (preferred over a literal `aria-label`). A card `<ul>` labelled by its section heading then announces as e.g. "Services, list, 3 items".
 - **First rule of ARIA — prefer native HTML.** Only reach for ARIA when no native element/attribute conveys the meaning; never add a `role` that just duplicates an element's native role, and don't override native semantics.
-- **Every control needs an accessible name** — icon-only buttons/links get `aria-label` or visua11y-hidden text; link/button text must make sense out of context (no "click here"); avoid `href="#"` placeholders in production.
+- **Every control needs an accessible name** — icon-only buttons/links get `aria-label` or visually-hidden text; link/button text must make sense out of context (no "click here"); avoid `href="#"` placeholders in production.
 - **One `<h1>` per page; never skip heading levels** (h1 → h2 → h3 …).
 - **Visible focus** — never strip focus outlines without a replacement; ensure a clear `:focus-visible` indicator (≥ 3:1 contrast) on every interactive element.
 - **Decorative icons / SVGs** → `aria-hidden="true"`; meaningful ones get an accessible name (`<title>` / `aria-label`).
