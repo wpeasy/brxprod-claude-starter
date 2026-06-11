@@ -11,10 +11,10 @@ Collect three foundational colours and apply them to the site's **Theme Style** 
 Ask all three together (one `AskUserQuestion` call, three questions). **Favour design-system tokens** over raw hex (project convention: never a fixed value where a token exists) — build the options from the site's `brxw-*`/`brxp-*` inventory in `CLAUDE.md`, and always leave room for a custom value:
 
 1. **Site background colour** — e.g. `var(--brxp-surface)` *(recommended)*, `var(--brxp-surface-l-1)`, `#ffffff`, or custom.
-2. **Default text (body) colour** — e.g. `var(--brxp-ally-surface-text)` *(recommended — the accessible pairing for the chosen surface)*, `var(--brxw-color-neutral-900)`, or custom.
+2. **Default text (body) colour** — e.g. `var(--brxp-a11y-surface-text)` *(recommended — the accessible pairing for the chosen surface)*, `var(--brxw-color-neutral-900)`, or custom.
 3. **Default heading colour** — e.g. `var(--brxp-primary)`, `var(--brxw-color-neutral-950)`, match-body, or custom.
 
-When the user picks a background, **recommend its `ally` pairing** for the text colour (e.g. `--brxp-surface` → `--brxp-ally-surface-text`) so the defaults meet contrast out of the box. Accept a raw hex if the user insists, but if it maps to an existing token, suggest the token.
+When the user picks a background, **recommend its `a11y` pairing** for the text colour (e.g. `--brxp-surface` → `--brxp-a11y-surface-text`) so the defaults meet contrast out of the box. Accept a raw hex if the user insists, but if it maps to an existing token, suggest the token.
 
 ## Theme Style key map (what we apply)
 Theme Style settings nest by group key. Set, **merging into existing settings** (never replace the whole style):

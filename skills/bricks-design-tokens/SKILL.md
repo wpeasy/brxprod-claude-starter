@@ -1,16 +1,18 @@
 ---
 name: bricks-design-tokens
-description: Extract every Bricks global CSS variable name (excluding internal `*-fluid` aliases) and every Bricks global class name from a Novamira-connected Bricks WordPress site, then write/refresh a "Bricks Design System reference" section in the project's CLAUDE.md. Use when onboarding a new Bricks site, or whenever the site's variables/classes/color palette change. Requires a connected Novamira MCP server for the target site.
+description: Extract every Bricks global CSS variable name (excluding internal `*-fluid` aliases) and every Bricks global class name from a Novamira-connected Bricks WordPress site, then write/refresh the "Bricks Design System reference" inventory into the project's BRICKS-TOKENS.md (an on-demand reference linked from CLAUDE.md). Use when onboarding a new Bricks site, or whenever the site's variables/classes/color palette change. Requires a connected Novamira MCP server for the target site.
 ---
 
-# Bricks Design Tokens → CLAUDE.md
+# Bricks Design Tokens → BRICKS-TOKENS.md
 
-Generate a **names-only** inventory of a Bricks site's design system (global CSS variables + global classes) and record it in the project's `CLAUDE.md`, so future styling work reuses the site's tokens instead of hard-coded values.
+Generate a **names-only** inventory of a Bricks site's design system (global CSS variables + global classes) and record it in the project's `BRICKS-TOKENS.md` (an on-demand reference linked from `CLAUDE.md`), so future styling work reuses the site's tokens instead of hard-coded values.
+
+> **Why a separate file:** the full enumeration is large and only needed to confirm an exact token name. `CLAUDE.md` keeps a compact *naming-patterns cheat-sheet* + a pointer to `BRICKS-TOKENS.md`; this skill writes the exhaustive list into `BRICKS-TOKENS.md` so it loads on demand, not on every session. **Do not** paste the full list back into `CLAUDE.md`.
 
 ## Prerequisites
 
 - A connected **Novamira MCP server** for the target site (tools: `mcp-adapter-discover-abilities`, `mcp-adapter-get-ability-info`, `mcp-adapter-execute-ability`).
-- If several Novamira servers are connected, confirm which site the inventory is for, and label the CLAUDE.md section with that server name.
+- If several Novamira servers are connected, confirm which site the inventory is for, and label the `BRICKS-TOKENS.md` section with that server name.
 
 ## Rules
 
@@ -60,18 +62,20 @@ return $md;
 >
 > A site may have either, both, or neither (e.g. Wireframes only → no `brxp-*`; plain Bricks → neither, so the inventory is empty and that's correct to report). Bricks core `bricks-color-*` and non-prefixed classes are intentionally out of scope.
 
-### 2. Write CLAUDE.md
+### 2. Write BRICKS-TOKENS.md
 
-Take the returned markdown body and wrap it in a section in the project's `CLAUDE.md` (create the file if missing; otherwise replace the existing "Bricks Design System reference" section in place — do not duplicate it):
+Take the returned markdown body and wrap it as the contents of the project's **`BRICKS-TOKENS.md`** (create the file if missing; otherwise replace the existing "Bricks Design System reference" section in place — do not duplicate it):
 
 ```markdown
 ## Bricks Design System reference — `<server-name>`
 
-> Auto-generated inventory of the Bricks global CSS variables and global classes. Names only; `*-fluid` aliases excluded (use the non-fluid name). Regenerate with the `bricks-design-tokens` skill when the design system changes.
+> Auto-generated inventory of the Bricks global CSS variables and global classes. Names only; `*-fluid` aliases excluded (use the non-fluid name). Regenerate with the `bricks-design-tokens` skill when the design system changes. *(On-demand reference; `CLAUDE.md` keeps the patterns cheat-sheet + a pointer here.)*
 
 <MARKDOWN BODY FROM STEP 1>
 ```
 
+Leave `CLAUDE.md` untouched **except** to confirm it still has the design-system pointer + the naming-patterns cheat-sheet (do not inline the full list there). If `CLAUDE.md` still contains a full inline inventory (older projects), replace it with the cheat-sheet + a pointer to `BRICKS-TOKENS.md`.
+
 ### 3. Confirm
 
-Report the totals (variable count, class count) and the path written, so the user can sanity-check against the live site.
+Report the totals (variable count, class count) and the path written (`BRICKS-TOKENS.md`), so the user can sanity-check against the live site.

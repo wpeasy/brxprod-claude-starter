@@ -61,7 +61,7 @@ The template encodes (see `CLAUDE.starter.md` for the full rules):
 - **Code → Fluent Snippets only**, created inactive for manual review.
 - **CPTs & custom fields → the field tool's UI only** (Meta Box AIO Pro by default; ACF if that's the site's tool — verify which/edition) — never `register_*` in code.
 - **`nm-` / `novamira-`** namespace for project classes, CSS vars, PHP, and text domain — kept separate from the framework's `brxw-`/`brxp-`.
-- **Styling:** always use `brxw-`/`brxp-` variables (never fixed values); snap to the scales; one `nm-` BEM global class per element with pretty-printed, nested CSS; `ally` text colors as the minimum contrast on colored backgrounds; `auto-fit` grids with `align-items: stretch`; `@container` (never `@media`).
+- **Styling:** always use `brxw-`/`brxp-` variables (never fixed values); snap to the scales; one `nm-` BEM global class per element with pretty-printed, nested CSS; `a11y` text colors as the minimum contrast on colored backgrounds; `auto-fit` grids with `align-items: stretch`; `@container` (never `@media`).
 - **Layout Rails** for outer/section layout via named grid lines + variables.
 - **HTML semantics & accessibility** first — real lists, correct elements, a11y best practices.
 - **Element labels mirror the BEM class** so the Bricks structure panel matches the CSS.
