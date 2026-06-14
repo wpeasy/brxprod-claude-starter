@@ -66,8 +66,8 @@ Authenticate via `/mcp` → `shaders` → Authenticate (OAuth; local callback co
 
 ### 1. The canvas element (Bricks)
 - A **Div** with **Tag = Custom, Custom tag = `canvas`** → real `<canvas>` (needs *Allow Canvas Tag* active).
-- A global class placing it behind content, e.g. `nm-hero-shader`: `position:absolute; inset:0; width:100%; height:100%; display:block; z-index:-1000; pointer-events:none;`
-- Make it the **last child** of a Section with **`brxp-has-bg-media`** (provides `relative; isolation; overflow:clip`).
+- Put **`brxp-has-bg-media`** on the Section and **`brxp-has-bg-media__media`** on the canvas itself, as the Section's **last child**. The container class gives `position:relative; isolation:isolate; overflow:clip`; **`__media` is what positions the canvas** behind the content (`position:absolute; inset:0; object-fit:cover; z-index:-1000`) — so you do **not** need a custom positioning class on the canvas.
+- ⚠️ **The pairing is mandatory:** if the Section has `brxp-has-bg-media` but the canvas is missing `brxp-has-bg-media__media`, the canvas is never positioned (it won't sit behind the content). Don't add the container class without the `__media` class on its media child.
 - Attributes: `aria-hidden="true"` + one config marker below.
 
 ### 2. Config — two methods
