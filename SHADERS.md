@@ -44,15 +44,20 @@ The runtime runs both **inside the Bricks builder canvas iframe** and on the **r
 
 ## Viewport / resize behaviour
 
-⚠️ **The library locks the canvas to a fixed pixel size.** shaders.com is three.js-based, and `three`'s `renderer.setSize()` writes inline `width`/`height` (px) **onto the `<canvas>`**. Those inline styles override the canvas's CSS `width:100%/height:100%`, so the canvas **freezes at its initial size** even when its container (e.g. a `100vh` section) resizes — and the library's own resize watcher then sees a canvas whose box never changes, so it never re-fits. (Symptom: an `inlineStyle: width: …px; height: …px;` that never updates.)
+⚠️ **The library writes a fixed pixel size onto the canvas.** shaders.com is three.js-based, and `three`'s `renderer.setSize()` writes inline `width`/`height` (px) **onto the `<canvas>`**. A normal CSS `width:100%/height:100%` loses to that inline style, so the canvas would **freeze at its initial size** when its container (e.g. a `100vh` section) resizes — and the library's own resize watcher then sees a canvas whose box never changes, so it never re-fits. (Symptom: an `inlineStyle: width: …px; height: …px;` that never updates.)
 
-The runtime works around this with a debounced **`window` `resize`/`orientationchange`** handler. For each live shader it:
-1. **Clears the inline `width`/`height`** the library set, and forces a reflow — so the canvas snaps back to its container's *current* size.
-2. Re-measures:
-   - **Significant change** (width changed, or height changed by more than `max(150px, 20%)`) → **re-init** (destroy → recreate) so parameters recompute for the new dimensions; frozen shaders re-freeze the new first frame.
-   - **Minor change** → `shader.resize()`; a **frozen** shader (reduced-motion / editor-paused) also gets a one-frame repaint (resume → rAF → pause), since its halted loop won't redraw at the new size on its own.
+**The fix is one CSS rule — beat the inline style with `!important`.** The runtime injects (once, at start) a stylesheet rule:
 
-> **Why `window` resize, not `ResizeObserver`:** a `ResizeObserver` on the canvas only fires when the canvas's *own box* changes — but the inline-px lock means that box never changes, so the observer stays silent. The `window` listener fires regardless, and **clearing the inline size is what actually lets the canvas re-fit**. This also covers the Bricks builder: resizing the preview fires the iframe `window`'s resize.
+```css
+canvas[data-nm-shader-preset], canvas[data-nm-shader-config] {
+  width: 100% !important;
+  height: 100% !important;
+}
+```
+
+An **author `!important`** declaration outranks a **normal inline** style in the cascade, so the canvas's *display* size is locked to its container and tracks it live — `three.setSize()` can keep writing inline px, but those are display-overridden (and it can't clobber a stylesheet rule the way it clobbers our own inline styles). With the box now following the container, **the library's own `ResizeObserver` (`observeElement`, on by default) re-fits the drawing buffer** on its own. No JS resize handler, no debounce, no re-init.
+
+> **Why this works where `ResizeObserver` "didn't":** the observer was never broken — it was *starved*. The inline-px lock meant the canvas box never changed, so it never fired. Making CSS win the cascade lets the box follow the container, which feeds the observer. (`object-fit: cover` from `brxp-has-bg-media__media` covers the sub-frame moment between a resize and three repainting the buffer, so there's no stretch.) Also covers the Bricks builder: the canvas fills the resized preview, and three's observer repaints.
 
 ---
 
