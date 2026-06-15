@@ -17,7 +17,7 @@ How to add **shaders.com** GPU visual effects (animated gradient / cloud / ASCII
 | **NM Shader Runtime** | JS (`load_as_file`) | the engine: mounts tagged canvases, loads the bundle once, manages pause/freeze/resize |
 | **NM Shader Pause/Play (toolbar)** | JS (inline, no gating) | builder toolbar button → drives the editor pause |
 
-**Per instance** = a `<canvas>` behind your content + a config marker. The runtime mounts every `canvas[data-nm-shader]` / `canvas[data-nm-shader-config]`. It **loads `https://esm.sh/shaders@<version>/js/bundle` once** (shared), uses a **`MutationObserver`** (so it works in the builder canvas, which renders client-side), is idempotent, **destroys** offscreen canvases, and **re-inits on significant viewport changes** (below). *(Pin a known-good library version; this was validated against `shaders@2.5.129` + its bundled `three@0.184`.)*
+**Per instance** = a `<canvas>` behind your content + a config marker. The runtime mounts every `canvas[data-nm-shader-preset]` / `canvas[data-nm-shader-config]`. It **loads `https://esm.sh/shaders@<version>/js/bundle` once** (shared), uses a **`MutationObserver`** (so it works in the builder canvas, which renders client-side), is idempotent, **destroys** offscreen canvases, and **re-inits on significant viewport changes** (below). *(Pin a known-good library version; this was validated against `shaders@2.5.129` + its bundled `three@0.184`.)*
 
 ---
 
@@ -71,8 +71,8 @@ Authenticate via `/mcp` → `shaders` → Authenticate (OAuth; local callback co
 - Attributes: `aria-hidden="true"` + one config marker below.
 
 ### 2. Config — two methods
-- **A. Named preset (recommended):** canvas attr `data-nm-shader="<slug>"`; add `{ components, options? }` under that slug in **NM Shader Presets** (paste the Shaders object as-is — it's valid JS).
-- **B. Inline (one-off):** canvas attr `data-nm-shader-config="#my-cfg"`; a Bricks **Code** element with **Execute code ON / Render without wrapper ON**, content pasted into the **PHP & HTML** field:
+- **A. Named preset (recommended — the default route):** canvas attr `data-nm-shader-preset="<slug>"`; add `{ components, options? }` under that slug in **NM Shader Presets** (paste the Shaders object as-is — it's valid JS). Reusable across canvases, no Code element, no signature.
+- **B. Inline Code element (one-off only):** canvas attr `data-nm-shader-config="#my-cfg"`; a Bricks **Code** element with **Execute code ON / Render without wrapper ON**, content pasted into the **PHP & HTML** field:
   ```html
   <script type="application/json" class="nm-shader-config" id="my-cfg"> …config… </script>
   ```
