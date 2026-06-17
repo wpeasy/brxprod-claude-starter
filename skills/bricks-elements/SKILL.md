@@ -1,11 +1,11 @@
 ---
 name: bricks-elements
-description: Fetch the controls/settings schema for every registered Bricks element via the Novamira MCP, write a BRICKS_EL_{name}.md reference file for each element, and update BRICKS-COMPONENTS.md with a linked index table. Use when onboarding a new Bricks site, when custom elements are added or changed, or when you need a schema reference to configure elements programmatically. Requires a connected Novamira MCP server.
+description: Fetch the controls/settings schema for every registered Bricks element via the Novamira MCP native abilities, write a BRICKS_EL_{name}.md reference file for each element, and update BRICKS-COMPONENTS.md with a linked index table. Use when onboarding a new Bricks site, when custom elements are added or changed, or when you need a schema reference to configure elements programmatically. Requires a connected Novamira MCP server.
 ---
 
 # Bricks Elements → BRICKS_EL_*.md
 
-Enumerate every element registered in the Bricks element registry, capture its full controls (settings) schema, write one `BRICKS_EL_{name}.md` per element into the project root, and add or refresh an index section in `BRICKS-COMPONENTS.md`.
+Enumerate every element registered in Bricks, capture each element's full controls (settings) schema, write one `BRICKS_EL_{name}.md` per element into the project root, and add or refresh an index section in `BRICKS-COMPONENTS.md`.
 
 ## Prerequisites
 
@@ -14,65 +14,48 @@ Enumerate every element registered in the Bricks element registry, capture its f
 
 ---
 
-## Step 1 — Fetch all registered element names and labels
+## Step 1 — List all registered element names
 
-Call `mcp-adapter-execute-ability` with `ability_name: "novamira/execute-php"` and the `parameters.code` below. It returns a JSON-encoded array keyed by element name with just `label` and `category` — no controls yet (keeps the response small):
+Call `mcp-adapter-execute-ability` with:
+- `ability_name: "novamira/bricks-list-elements"` (no `element` parameter)
 
+This returns the full list of registered element names (and any summary metadata the adapter provides). Collect the element names into a list.
+
+> **Filter option:** if the user asks to limit to a prefix (e.g. `brxc-`, `nm-`, `brf-`), filter the list at this stage.
+
+**Fallback** (if `bricks-list-elements` is unavailable): use `mcp-adapter-execute-ability` with `ability_name: "novamira/execute-php"` and:
 ```php
-$out = [];
-if (class_exists('\Bricks\Elements')) {
-    foreach (\Bricks\Elements::$elements as $name => $class) {
-        if (!class_exists($class)) continue;
-        try {
-            $el = new $class();
-            $out[$name] = [
-                'label'    => property_exists($el, 'label')    ? $el->label    : $name,
-                'category' => property_exists($el, 'category') ? $el->category : 'general',
-            ];
-        } catch (\Throwable $e) {
-            $out[$name] = ['label' => $name, 'category' => '', 'error' => $e->getMessage()];
-        }
-    }
-}
-ksort($out);
-return json_encode($out);
+$names = array_keys(\Bricks\Elements::$elements ?? []);
+sort($names, SORT_STRING);
+return json_encode($names);
 ```
-
-Decode the JSON. If `\Bricks\Elements::$elements` is unavailable (empty array or class missing), fall back to calling `novamira/bricks-list-elements` to retrieve at least element names, then proceed with whatever metadata is available.
-
-> **Filter option:** if the user asks to limit to a prefix (e.g. `brxc-`, `nm-`), apply `strpos($name, $prefix) === 0` inside the loop. Default is all registered elements.
 
 ---
 
-## Step 2 — Fetch controls schema for each element (batched)
+## Step 2 — Fetch the controls schema for each element
 
-Fetch controls in **batches of 15 elements** to avoid PHP timeouts. For each batch call `mcp-adapter-execute-ability` with `ability_name: "novamira/execute-php"`:
+For each element name, call:
+- `ability_name: "novamira/bricks-list-elements"`, `parameters: { element: "<name>" }`
 
-```php
-// $targets = array of element names for this batch (pass as JSON-encoded string in code)
-$targets = json_decode('TARGETS_JSON_HERE', true);
-$out = [];
-foreach ($targets as $name) {
-    if (!isset(\Bricks\Elements::$elements[$name])) { $out[$name] = null; continue; }
-    $class = \Bricks\Elements::$elements[$name];
-    if (!class_exists($class)) { $out[$name] = null; continue; }
-    try {
-        $el = new $class();
-        $out[$name] = property_exists($el, 'controls') ? $el->controls : [];
-    } catch (\Throwable $e) {
-        $out[$name] = ['_error' => $e->getMessage()];
-    }
-}
-return json_encode($out);
-```
+This returns the element's label, category, and full `controls` array.
 
-Replace `TARGETS_JSON_HERE` with the JSON-encoded array of 15 element names for that batch. Collect all batch results into a single `controls_by_name` map.
+**Important notes:**
+- The response can be **large** for complex elements (e.g. `brf-pro-forms`). If an individual response exceeds comfortable context, write the raw JSON to a temp file and parse it via a subagent or use `execute-php` to extract only the controls keys/labels.
+- Some elements (e.g. Bricksforge field children like `brf-pro-forms-field-*`) may throw an error on `bricks-list-elements` (`array_merge(): null given`). For those, fall back to `execute-php`:
+  ```php
+  $class = \Bricks\Elements::$elements['ELEMENT_NAME'] ?? null;
+  if (!$class || !class_exists($class)) return json_encode(['error' => 'not found']);
+  try { $el = new $class(); return json_encode(['label' => $el->label ?? '', 'category' => $el->category ?? '', 'controls' => $el->controls ?? []]); }
+  catch (\Throwable $e) { return json_encode(['error' => $e->getMessage()]); }
+  ```
+  Replace `ELEMENT_NAME` with the actual name.
+- If both methods fail, record the element as skipped and continue.
 
 ---
 
 ## Step 3 — Write BRICKS_EL_{name}.md for each element
 
-For every element in the name list (skip any whose controls returned `_error`), write `BRICKS_EL_{name}.md` in the **project root**. Overwrite if the file already exists.
+For every element successfully fetched (skip elements where both methods errored), write `BRICKS_EL_{name}.md` in the **project root**. Overwrite if the file already exists.
 
 ### File template
 
@@ -84,49 +67,39 @@ For every element in the name list (skip any whose controls returned `_error`), 
 
 ## Controls (Settings Schema)
 
-{controls table}
+{controls table — see format below}
 ```
 
 ### Controls table format
 
-Render the element's `controls` array as a markdown table. A control entry is a keyed array; the array key is the setting key stored on `settings`:
+Render the element's `controls` as a markdown table. Each entry is keyed by the setting key stored on `settings`:
 
 ```markdown
 | Key | Label | Type | Default | Notes |
 |-----|-------|------|---------|-------|
 ```
 
-Map each control entry:
+Populate each row from the control object:
 
-| Controls field | → Table column |
+| Control field | → Table column |
 |---|---|
 | array key | **Key** |
 | `label` | **Label** |
 | `type` | **Type** |
 | `default` (if set) | **Default** |
-| `options` (for `select`/`radio`) → comma-list of `value: label` | **Notes** |
+| `options` (select/radio) → `value: label` list | **Notes** |
 | `description` (if set) | append to **Notes** |
 | `required: true` | append `(required)` to **Notes** |
 
-For `repeater` and `group` type controls, add a sub-table or indented rows prefixed `↳` for each entry in their `fields` array.
+For `repeater` and `group` type controls, list the top-level control row then indent each entry in its `fields` array as sub-rows, prefixing the key with `↳ `.
 
-If an element has no controls write: `_No controls defined._`
-
-**Example output:**
-
-```markdown
-| Key | Label | Type | Default | Notes |
-|-----|-------|------|---------|-------|
-| tag | HTML Tag | select | div | div, section, article, main, aside, header, footer, nav |
-| width | Width | text | 100% | |
-| ↳ fields.gap | Gap | number | | Inside repeater `items` |
-```
+If an element has no controls, write: `_No controls defined._`
 
 ---
 
 ## Step 4 — Update BRICKS-COMPONENTS.md
 
-Add (or replace) a section at the **end** of `BRICKS-COMPONENTS.md`. The section marker is the heading `## Registered Element Schemas` — if it already exists, replace everything from that heading to end-of-file.
+Add (or replace) the section starting with `## Registered Element Schemas` at the end of `BRICKS-COMPONENTS.md`. If the heading already exists, replace everything from it to end-of-file.
 
 ```markdown
 ---
@@ -140,7 +113,7 @@ Auto-generated by the `bricks-elements` skill. Regenerate when elements are adde
 | `name` | Label | category | [BRICKS_EL_name.md](BRICKS_EL_name.md) |
 ```
 
-Sort rows alphabetically by element name. Skip any elements whose schema file was not written (error during controls fetch).
+Sort rows alphabetically by element name. Omit elements that were skipped (both fetch methods failed).
 
 ---
 
@@ -148,6 +121,6 @@ Sort rows alphabetically by element name. Skip any elements whose schema file wa
 
 Report:
 - Total elements found in the registry
-- Number of `BRICKS_EL_*.md` files written (vs. skipped with reason)
+- Number of `BRICKS_EL_*.md` files written
+- Any elements skipped (name + reason)
 - Confirmation that `BRICKS-COMPONENTS.md` was updated
-- Any elements that errored during instantiation (list names + errors)
