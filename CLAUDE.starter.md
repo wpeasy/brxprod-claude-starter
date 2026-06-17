@@ -220,6 +220,7 @@ Useful when configuring Bricks through the Novamira abilities / data layer:
 - **Verify via Novamira read-backs** — after a write (content, settings, classes), read it back to confirm; don't assume success.
 - ⚠️ **Before editing an existing page, read its current content first** (`bricks-get-content`) and base every change on that — the user may have edited the page in the Bricks builder since it was built. **Never resend a remembered/older element tree blind** — a full `bricks-set-content` replace would wipe their edits. Prefer targeted edits (`bricks-insert-content` / `bricks-patch-elements` / `bricks-remove-content`); if you must replace a whole area, re-fetch with `bricks-get-content` immediately beforehand.
 - **After any design-system change** (variables, classes, color palette), re-run the **`bricks-design-tokens`** skill to refresh the reference below.
+- **Always check native Novamira abilities before writing custom PHP.** Call `mcp-adapter-discover-abilities` (or `mcp-adapter-get-ability-info`) to see what the connected server supports before reaching for `novamira/execute-php`. Most common Bricks tasks (listing elements/classes/variables, reading/writing content, managing components) have a dedicated ability — use it. `execute-php` is the fallback of last resort, not the first tool.
 - Treat `execute-php` as **read/inspect only** for persistent behaviour — any code that should live on the site goes through Fluent Snippets (see above).
 
 ## Layout Rails (BRXProd)
