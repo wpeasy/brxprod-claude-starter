@@ -26,6 +26,12 @@ Operator list lives in `ws-form-pro/includes/config/class-ws-form-config-conditi
 ## Field TYPE cannot be changed on an existing field
 `db_update_from_object` (and even a direct `wsf_field` table write) **revert** a changed type — `text→file` and `select→radio` snap straight back. To change a type you must **recreate the field**: rebuild the section's field array with a fresh field (new id, full replace), or change it in the builder. Types: `text, textarea, number, tel, email, url, select, checkbox, radio, datetime, file, signature, hidden, password, submit, …`.
 - A **file** field can't be conjured from scratch reliably — create a throwaway form from a template that has one (`employment-application` includes a `file`), clone that field object, then delete the throwaway.
+- **Recreate via `WS_Form_Field::db_create(<next_sibling_id>)`** — the type sticks on a *new* id (in-place change still reverts). Re-point any **conditional rules** and **Create Post mappings** that referenced the old field id, then delete the old. `db_delete()` commits, but a **subsequent `db_read` in the same script throws** — do deletes last or in a separate call.
+- **`select → radio` as segmented buttons works from the data layer:** recreate as `radio` with `radio_style:"button"` (or `"button-full"`), `orientation:"horizontal"`, `default_value_radio:"<value>"`, a `data_grid_radio` of rows, and `radio_field_value`/`radio_field_label` column mapping (keep the same stored values). Radio conditions use `logic:"checked"` (not `"selected"`).
+
+## Calc / aggregating one value (e.g. select-or-"Other" → a single entry value)
+- **WS Form calc / `IF()` CANNOT be authored from the data layer** — calc text in `default_value` is **not evaluated** (renders verbatim); set calcs in the builder's calculator (**fx**) UI and leave `default_value` empty from code.
+- **Conditional logic has no "set value" action** (only row select/check, visibility, class, date min/max). To aggregate "an option or a typed Other" into one mapped value: add a **hidden field**, map *it* in Create Post, and compute it with a builder calc like `IF(#field(<select>) = "Other", #field(<other_text>), #field(<select>))` (insert `#field(id)` tokens via the field picker).
 
 ## Actions — `meta.action` (also a data_grid)
 `meta.action.groups[0].rows[]`, each row = `{id, data:["<label>", "<action JSON>"]}`; action JSON = `{ "id":"<action_id>", "meta":{…}, "events":["submit"] }`.
