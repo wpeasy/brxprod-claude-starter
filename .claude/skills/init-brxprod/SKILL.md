@@ -44,8 +44,8 @@ Use `AskUserQuestion` — **User level** vs **Project level**:
 - **Project level** — `<project>/.claude/skills/`. Scoped to this project only and travels with the repo (commit them) — good when different projects need different versions.
 
 ## Step 4 — Move the skills into place
-Relocate these **four** skill folders from the starter's `skills/` source into the chosen target:
-`add-overlay`, `add-pattern`, `bricks-design-tokens`, `init-bricks`.
+Relocate these **five** skill folders from the starter's `skills/` source into the chosen target:
+`add-overlay`, `add-pattern`, `bricks-design-tokens`, `bricks-elements`, `init-bricks`.
 
 > Leave **`init-brxprod`** where it is — it lives in `.claude/skills/init-brxprod/` and stays **project-level** as the bootstrap.
 
@@ -63,13 +63,13 @@ Commands (adapt to OS; substitute the resolved `<TARGET>`):
 - **macOS / Linux (bash):**
   ```bash
   mkdir -p <TARGET>
-  cp -R skills/add-overlay skills/add-pattern skills/bricks-design-tokens skills/init-bricks <TARGET>/
+  cp -R skills/add-overlay skills/add-pattern skills/bricks-design-tokens skills/bricks-elements skills/init-bricks <TARGET>/
   rm -rf skills
   ```
 - **Windows (PowerShell):**
   ```powershell
   New-Item -ItemType Directory -Force <TARGET> | Out-Null
-  Copy-Item skills\add-overlay,skills\add-pattern,skills\bricks-design-tokens,skills\init-bricks <TARGET> -Recurse -Force
+  Copy-Item skills\add-overlay,skills\add-pattern,skills\bricks-design-tokens,skills\bricks-elements,skills\init-bricks <TARGET> -Recurse -Force
   Remove-Item skills -Recurse -Force
   ```
 
@@ -79,6 +79,7 @@ Read `<TARGET>` (and `.claude/skills/`) and confirm what's now installed:
 - **`/init-bricks`** — sets the base Theme Style colours (site background, body text, headings), favouring design tokens.
 - **`/add-overlay`** `.class|#id` — merges the standard dark overlay scrim onto a global class or element id (pairs with `brxp-has-bg-media`).
 - **`/add-pattern`** `.class|#id` — merges a decorative SVG background-pattern layer onto a global class or element id.
+- **`/bricks-elements`** — fetches the controls/settings schema for every registered Bricks element and writes individual `BRICKS_EL_{name}.md` reference files + an index in `BRICKS-COMPONENTS.md`.
 - **`/init-brxprod`** — this bootstrap (stays project-level).
 
 Tell the user a **reload may be needed** for newly installed skills to show up (restart the client, or reload the session / run `/mcp`-style reconnect per their client).

@@ -264,3 +264,13 @@ Variant classes only set public vars:
 - **Omitting `group`** — ungrouped properties pile up in a flat list. Always group related properties.
 - **`type: "toggle"` vs boolean select** — `toggle` is the right choice for binary show/hide; for anything with a visible label in the panel, a `class` or `select` type reads better.
 - **Building with `nm-` classes for sub-components** — atomic sub-components that are reusable across projects or components should use `atom-` (or another project-agnostic prefix). Reserve `nm-` for project-specific blocks.
+
+---
+
+## Registered Element Schemas
+
+> Run the `bricks-elements` skill to populate this section. It fetches the controls/settings schema for every registered Bricks element via the Novamira MCP and writes individual `BRICKS_EL_{name}.md` reference files to the project root, then replaces this section with a linked index table.
+>
+> **Command:** invoke `/bricks-elements` (or ask Claude to run the `bricks-elements` skill) with a Novamira MCP server connected.
+
+No element schemas generated yet.

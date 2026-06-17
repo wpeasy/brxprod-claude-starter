@@ -14,8 +14,8 @@
  * Returns per-target: errors[] (must fix), warnings[] (review), PASS bool.
  *
  * Rules:
- *  - every element has a `label` matching its BEM class (block -> NAME, element -> SEGMENT)
- *  - every element carries its own `nm-` BEM global class
+ *  - every element has a `label` matching its BEM class (block -> Name, element -> Segment; mixed case allowed, checked case-insensitively)
+ *  - every element carries its own BEM global class (nm-, atom-, or cross-project prefix)
  *  - framework classes (brxp-*/brxw-*) applied via _cssGlobalClasses, not plain _cssClasses
  *  - _cssCustom uses literal `.class` selectors, never %root%; no raw hex (E) / px (W)
  *  - list semantics: __list -> ul/ol, __item -> li, __card -> article(+header+footer)
@@ -41,7 +41,7 @@ $expected_label = function($cn) {
     if (strpos($seg, '--') !== false) $seg = substr($seg, 0, strpos($seg, '--'));
     return strtoupper(str_replace('-', ' ', $seg));
   }
-  return strtoupper(str_replace('-', ' ', preg_replace('/^nm-/', '', $cn)));
+  return strtoupper(str_replace('-', ' ', preg_replace('/^(nm|atom)-/', '', $cn)));
 };
 
 $css_of = function($cn) use ($byId) {
@@ -53,7 +53,9 @@ $lint_class_css = function($cn) use ($css_of) {
   $issues = []; $css = $css_of($cn);
   if ($css === '') return $issues;
   if (strpos($css, '%root%') !== false) $issues[] = "E: class $cn uses %root% in _cssCustom (must be literal .$cn)";
-  if (preg_match('/#[0-9a-fA-F]{3,8}\b/', $css)) $issues[] = "E: class $cn has a raw hex colour (use a brxp/brxw token)";
+  $cssHexCheck = preg_replace('/\burl\s*\([^)]*\)/s', '', $css); // strip data URIs
+  $cssHexCheck = preg_replace('/(-webkit-)?mask(?:-image|-mode|-repeat|-size|-position|-clip|-origin|-composite)?\s*:[^;]+;/i', '', $cssHexCheck); // mask hex = luminance value, not a design token
+  if (preg_match('/#[0-9a-fA-F]{3,8}\b/', $cssHexCheck)) $issues[] = "E: class $cn has a raw hex colour (use a brxp/brxw token)";
   if (preg_match_all('/(?<![\w.-])(\d*\.?\d+)px/', $css, $m)) {
     foreach ($m[1] as $v) { if ((float)$v !== 0.0) { $issues[] = "W: class $cn has a raw px value ({$v}px) (prefer a token)"; break; } }
   }
@@ -77,7 +79,7 @@ $audit_tree = function($E) use ($byId, $names, $expected_label, $lint_class_css,
   foreach ($E as $el) { $childrenOf[$el['parent'] ?? 0][] = $el; $byElId[$el['id']] = $el; }
   $errs = []; $warns = []; $seen = [];
   $cnameOf = function($el) use ($byId) {
-    foreach (($el['settings']['_cssGlobalClasses'] ?? []) as $cid) { $nm = $byId[$cid]['name'] ?? ''; if (strpos($nm, 'nm-') === 0) return $nm; }
+    foreach (($el['settings']['_cssGlobalClasses'] ?? []) as $cid) { $nm = $byId[$cid]['name'] ?? ''; if ($nm !== '' && strpos($nm, 'brxw-') !== 0 && strpos($nm, 'brxp-') !== 0) return $nm; }
     return '';
   };
   $seenInOrder = [];
@@ -92,11 +94,11 @@ $audit_tree = function($E) use ($byId, $names, $expected_label, $lint_class_css,
     $where = "[$name#$id" . (isset($el['label']) ? " \"{$el['label']}\"" : '') . ']';
     $cn = $cnameOf($el);
     if (empty($el['label'])) $errs[] = "$where missing label";
-    if ($cn === '') { $errs[] = "$where has no nm- BEM global class"; }
+    if ($cn === '') { $errs[] = "$where has no BEM global class (nm-, atom-, or cross-project)"; }
     else {
       $lblBase = trim(preg_replace('/\s*[\(\[\{].*$/', '', $el['label'] ?? ''));
       $exp = $expected_label($cn);
-      if ($lblBase !== $exp) $errs[] = "$where label \"$lblBase\" != expected \"$exp\" (from .$cn)";
+      if (strtoupper($lblBase) !== $exp) $errs[] = "$where label \"$lblBase\" != expected \"$exp\" (from .$cn, case-insensitive)";
       if (empty($seen[$cn])) { $seen[$cn] = true; foreach ($lint_class_css($cn) as $iss) { if ($iss[0] === 'E') $errs[] = $iss; else $warns[] = $iss; } }
       foreach ($lint_rails_css($cn, $name) as $iss) { if ($iss[0] === 'E') $errs[] = $iss; else $warns[] = $iss; }
       $ct = $s['customTag'] ?? '';

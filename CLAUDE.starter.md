@@ -192,9 +192,9 @@ Treat a linter failure like a failing test: fix it, re-run, and only then report
 
 #### Element labels must mirror the BEM class
 Every Bricks element's **label** is derived from its class so the structure panel matches the CSS:
-- **BEM block** (root class, no `__` — e.g. `nm-hero`): label = the class **with the `nm-` prefix removed**, uppercased with `-` → space → `HERO`. (`nm-cta` → `CTA`, `nm-testimonials` → `TESTIMONIALS`, `nm-feature-grid` → `FEATURE GRID`.) The `nm-` project prefix is never shown in labels.
-- **BEM element** (`block__element` — e.g. `nm-hero__title`, `nm-audience__card-title`): label = the **element segment** (the part after `__`), uppercased with `-` → space → `TITLE`, `CARD TITLE`. Modifiers (`--primary`) are not part of the label.
-- **Comments** may be appended to any label inside `()`, `[]`, or `{}` — e.g. `NM TESTIMONIALS (rail-full)`, `BTN (primary)`, `GRID [auto-fit]`.
+- **BEM block** (root class, no `__` — e.g. `nm-hero`): label = the class **with the `nm-`/`atom-` prefix removed**, hyphens → spaces — e.g. `nm-cta` → `CTA`, `nm-feature-grid` → `Feature Grid`. Mixed case is allowed; the linter matches case-insensitively.
+- **BEM element** (`block__element` — e.g. `nm-hero__title`, `nm-audience__card-title`): label = the **element segment** (the part after `__`), hyphens → spaces — e.g. `__card-title` → `Card Title`. Modifiers (`--primary`) are not part of the label.
+- **Comments** may be appended to any label inside `()`, `[]`, or `{}` — e.g. `Testimonials (rail-full)`, `Btn (primary)`, `Grid [auto-fit]`.
 - **The block class must exist.** An `nm-<block>__element` class is only valid BEM if its block `nm-<block>` exists on an ancestor — put `nm-<block>` on the element that represents the block (commonly the **Section**, e.g. `nm-faq` on the FAQ section → label `FAQ`). **Never** leave a wrapper class-less while its descendants use `nm-<block>__*`. A comment may still be appended for context (e.g. `FAQ (rail-full)`).
 
 ### Bricks internals reference (discovered)
