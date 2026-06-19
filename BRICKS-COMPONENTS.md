@@ -267,6 +267,44 @@ Variant classes only set public vars:
 
 ---
 
+## Template vs Component
+
+Use this to decide how to build a reusable pattern before touching the editor.
+
+| | **Component** | **Template** |
+|---|---|---|
+| **What it is** | A reusable element *tree* (multi-element structure) that instances can override via properties | A full Bricks layout (header, footer, archive, single post, search) rendered via template conditions |
+| **Edited centrally?** | Yes — edit the component, all instances update | Yes — edit the template, all pages using it update |
+| **Scope** | A UI pattern repeated *within* pages (CTA band, card, section header, hero, button group) | A page-level layout applied *across* pages (site header, post template, archive grid) |
+| **Instance variation** | Via component properties (text, image, variant class) | Via dynamic data / Bricks query loops |
+| **Use when** | The same element tree appears on ≥ 2 pages / locations and needs central editing | The structure is a header, footer, single, archive, search, or 404 page layout |
+
+### Quick decision rule
+
+- Repeated **section or sub-section** inside a page → **Component**
+- Repeated across pages as the **page frame** (what wraps the content) → **Template**
+- A single styled element (button, eyebrow, badge) → **global class + BEM modifiers** (no Component needed)
+
+### Common patterns and their type
+
+| Pattern | Type | Notes |
+|---|---|---|
+| Hero / page banner | Component | Properties: heading, subheading, CTA link/label, background image |
+| Title Block (eyebrow + heading + lede) | Component | `atom-` namespace if reused across projects |
+| CTA Section / CTA Band | Component | Properties: heading, body, primary + secondary button |
+| Button Group | Component or global class | Single row of 2–3 buttons → global class + BEM is often enough; complex variant logic → Component |
+| Card / Testimonial Card | Component | Used inside a query loop; properties or dynamic data for content |
+| Card Grid | Component (or query loop) | Static set → Component with slot children; CMS-bound → query loop + card Component |
+| Icon + Heading + Text tile | Component | Wraps `icon-box` or hand-built structure |
+| Logo / Partner strip | Native `carousel` element | Not a Component unless it needs property-driven content |
+| Section header (eyebrow + h2 + lede, centred) | Component | Very common — make it once as `nm-section-head` |
+| Site header / nav | Template (header) | Scoped with "Entire website" condition |
+| Site footer | Template (footer) | Scoped with "Entire website" condition |
+| Single post layout | Template (single) | Scoped to post type |
+| Archive / blog grid | Template (archive) | Scoped to post type archive |
+
+---
+
 ## Registered Element Schemas
 
 > Run the `bricks-elements` skill to populate this section. It fetches the controls/settings schema for every registered Bricks element via the Novamira MCP and writes individual `BRICKS_EL_{name}.md` reference files to the project root, then replaces this section with a linked index table.

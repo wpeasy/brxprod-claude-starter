@@ -159,6 +159,7 @@ A page that *renders correctly* is **not** done. Before reporting any Bricks bui
 Treat a linter failure like a failing test: fix it, re-run, and only then report done. **A clean PASS is necessary, not sufficient — it does not prove you used Rails, components, or the right native element; it proves you didn't violate the mechanical checks. Still read the design and pick the right Bricks element + structure.**
 
 ### Bricks build conventions
+- **Scan for reusable patterns before building.** When asked to create page content, identify recurring structures (e.g. Button Group, Title Block, CTA Section, Card Grid, Hero). For each, ask the user whether it should be a **Component** (reusable element tree, edited centrally) or a **Template** (full header/footer/archive layout, scoped via template conditions) before building. Decision criteria → [`BRICKS-COMPONENTS.md` — Template vs Component](BRICKS-COMPONENTS.md#template-vs-component).
 - **Build pages in Bricks, not Gutenberg** — never mix block-editor content and Bricks on the same page.
 - **Match the pattern to its native Bricks element BEFORE hand-rolling.** Bricks ships real elements for most recognizable UI — use them instead of faking the effect with text/divs:
   - Animated number / stat → **`counter`** (not a styled text number).
