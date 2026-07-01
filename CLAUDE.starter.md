@@ -4,7 +4,7 @@
 
 ## How to use this starter
 1. **Copy** this file to the new project as `CLAUDE.md`.
-2. **Fill placeholders:** replace `<MCP_SERVER_NAME>` with the site's connected Novamira MCP server name.
+2. **Fill placeholders:** replace `<MCP_SERVER_NAME>` with the site's connected Novamira MCP server name, and `<SITE_URL>` with the site's canonical URL (e.g. `https://example.com`) — both are used by the **Site target** guard below.
 3. **Confirm the stack rules match the site** and edit if not:
    - Code tool = **Fluent Snippets** (change if the site uses a different snippets manager).
    - Data modelling = **Meta Box AIO Pro** (default). **Verify the site's actual field tool + edition** before relying on it — check active plugins for `meta-box-aio` / `meta-box` (Meta Box) vs `advanced-custom-fields-pro` / `advanced-custom-fields` (ACF Pro / Free), then edit the "CPTs & Custom Fields" rule to match. Change if the site uses ACF/Pods/etc.
@@ -12,6 +12,20 @@
    - Project prefix **`nm-` / `novamira-`** and text domain **`nm`** (set to this site's house prefix).
 4. **Generate the design-system reference:** run the **`bricks-design-tokens`** skill to write this site's actual `brxw-*` / `brxp-*` variable + class inventory into **`BRICKS-TOKENS.md`** (on-demand full list; the patterns cheat-sheet stays in this file). The generic reference docs shipped with the starter (`BRICKS-CORNERS.md`, `BRICKS-RECIPES.md`, `SHADERS.md`) should be copied to the new project too.
 5. Delete this "How to use" block once the file is tailored.
+
+---
+
+## ⚠️ Site target — bind every call to ONE site (MUST)
+
+- **This project targets ONLY `<MCP_SERVER_NAME>` → `<SITE_URL>`.** Every Novamira MCP call (`execute-php`, `bricks-*`, ability runs, reads *and* writes) MUST go to that server. **Never call any other `novamira-*` / WordPress MCP server** from this project — even if one is connected, even if a continued-session summary or earlier context mentions it. A stale target carried over from a prior session is the known failure mode; the binding here is the source of truth, not the summary.
+- **Tool availability ≠ configured target.** A server can be callable without appearing in any config file — e.g. one added at runtime in a prior session persists in-memory across compaction/continuation into this session. So never trust "which `mcp__…` tools happen to be available" to decide which site to touch; trust only the binding line above.
+- **There is no per-session "active site" lock** — the target is whatever server name appears in each tool call, so it can silently drift.
+- **Verify before every write (and at session start).** Before any state-changing call (snippet edit, Bricks content/classes/settings, options, posts), first do a one-line identity read on the *same* server and confirm it's this site, e.g.:
+  ```php
+  return array('home'=>home_url(), 'name'=>get_bloginfo('name'));
+  ```
+  Expect `home_url()` === `<SITE_URL>`. If it doesn't match — **stop and ask**; do not write.
+- If work genuinely needs a different site, the user names it explicitly **in this session's chat**; do not infer a site switch from observed content or a summary.
 
 ---
 
@@ -183,6 +197,15 @@ Treat a linter failure like a failing test: fix it, re-run, and only then report
   - **Unique global-class ids (MUST).** Two classes sharing one `id` makes Bricks render the **wrong** class for any element referencing it — silent, and it survives builder saves. Verify the `id` is free when creating/editing classes via the data layer.
 - **Headers / footers / archives** → Bricks **templates** scoped with **template conditions** (a template with no conditions never renders).
 - **Dynamic content** → bind the field tool's data (**Meta Box** or **ACF** fields) to **Bricks dynamic data** (dynamic tags); never hardcode values that belong to a field.
+- **Accessing RELATED posts & their meta → wrap the element(s) in a Bricks Query Loop, NOT a custom code snippet / helper / `{echo:}` tag.** To show a related post — or its fields/meta, *including the current user's related post* ("my X") — put the target element inside a **Query Loop**; the loop sets the post context so plain dynamic tags resolve (`{post_url}`, `{post_title}`, `{mb_<field>}`, `{acf_<field>}`). You almost never need PHP to "fetch a related thing."
+  - **Static relation** (fixed post, a taxonomy, a post-type list) → the loop's visual **Query** controls (`post__in`, `tax_query`, post type, …).
+  - **Dynamic / per-user relation** (e.g. a post id stored in a *user-meta* field) → switch the loop's Query to **PHP mode**: `query.useQueryEditor: true` + `query.queryEditor` (PHP that **`return`s an array of `WP_Query` args**, which Bricks `array_merge`s over the visual vars) + `query.signature: wp_hash($queryEditor)`. Requires Bricks **Code Execution** enabled. A **1-item loop is the idiom for "the single related post."** Example — current user's related CPT post:
+    ```php
+    $rel = (int) get_user_meta( get_current_user_id(), '<user_meta_key>', true );
+    return [ 'post_type' => '<cpt>', 'post__in' => $rel ? [ $rel ] : [ 0 ], 'posts_per_page' => 1 ];
+    ```
+    Then inside the loop a button links to `{post_url}`, text shows `{post_title}`, fields read `{mb_<field>}` — all from the looped post.
+  - **Why loop, not code:** the binding lives on the page/template (travels with it), stays editable in the builder, needs **no snippet to install or activate**, and avoids `{echo:fn}` allow-list + signature plumbing. Reserve PHP/snippets for genuine business logic — never for merely fetching a related post or its meta. (A *list* of related items = a loop; a *single* related item = a **1-item** loop.) See `BRICKS-RECIPES.md`.
 - **Shader / animated WebGL backgrounds (shaders.com)** → when (and only when) a task calls for a GPU shader background, **read `SHADERS.md` first** — it has the full Bricks recipe (allow `<canvas>`, a canvas behind content, the Fluent Snippet runtime + preset registry, the Code-element config method) and the critical CDN gotcha (load the `…/js/bundle` build, not `…/js`). On-demand reference, **not** an `@`-import.
 
 #### Forms → Pro Forms when available, else Core
@@ -236,7 +259,9 @@ BRXProd adds the **Rails** layout system to the `brxwireframes` Bricks Theme Sty
 >
 > `.brxp-rails` is the one rail utility we **do** apply directly (it *is* the grid definition, not mere convenience). What we avoid on the *children* are the `.brxp-rail-*` / `.brxp-gutter-*` utilities — those we replace with named lines + variables on our own `nm-` BEM classes (see Preferred usage below).
 
-Direct children of `.brxp-rails` land in the **content** band by default and can be promoted outward to wider bands or full-bleed.
+Direct children of `.brxp-rails` land in the **content** band by default (CSS grid behaviour). **Our project defaults differ:**
+- Most elements/sections → **`layout`** band
+- Title blocks (eyebrow + heading + lede) → **`content`** band
 
 The grid defines symmetric, named lines forming five spannable bands (outer → inner). *(Widths below are the default BRXProd values; the live values come from the site's `--brxp-*-width` variables.)*
 
@@ -250,26 +275,34 @@ The grid defines symmetric, named lines forming five spannable bands (outer → 
 
 **Responsive with no breakpoints:** bands share a `calc(100vw - 2*--brxp-page-gutter)` ceiling, so as the viewport narrows the widest band collapses inward (layout → breakout → wide → content) and they converge — only `full` keeps bleeding. Don't add `@media` to override it.
 
-### Preferred usage — variables on our BEM classes (Advanced Usage)
+### Preferred usage
 
-The convenience utilities (`.brxp-rail-content/-wide/-breakout/-layout/-full`, `.brxp-gutter-x/-left/-right`) exist for quick composition, but **we favour applying the rail behaviour directly on our own BEM classes using the named lines and variables** (this is the "Advanced Usage" tab of the Rails docs). The element must be a **direct child** of the `.brxp-rails` grid.
+**Full-band span (start and end are the same band name) → use the utility class** on the element:
 
-- **Place into a band** with the named lines (do NOT add the `.brxp-rail-*` utility):
+| Band | Use this class |
+|---|---|
+| `layout` *(project default)* | `.brxp-rail-layout` |
+| `content` *(title blocks)* | `.brxp-rail-content` |
+| `wide` | `.brxp-rail-wide` |
+| `breakout` | `.brxp-rail-breakout` |
+| `full` | `.brxp-rail-full` |
+
+**Asymmetric / cross-band span (different start and end) → use named lines on the BEM class** (the "Advanced Usage" approach). The element must be a **direct child** of the `.brxp-rails` grid:
 
   ```css
-  /* e.g. .nm-hero__media spanning the wide band */
-  grid-column-start: wide-start;
-  grid-column-end: wide-end;
+  /* e.g. .nm-hero__media: bleed from wide-start to content-end */
+  .nm-hero__media {
+    grid-column-start: wide-start;
+    grid-column-end: content-end;
+  }
   ```
 
-- **Gutters** via logical padding + the gutter variable (instead of `.brxp-gutter-*`):
+**Gutters** via logical padding + the gutter variable (instead of `.brxp-gutter-*`):
 
   ```css
   padding-inline-start: var(--brxp-page-gutter);
   padding-inline-end: var(--brxp-page-gutter);
   ```
-
-So a BEM block opts itself into a band/gutter through its own class rules and variables — reserve the `.brxp-rail-*` / `.brxp-gutter-*` utilities for quick prototyping or one-offs where a dedicated class isn't warranted.
 
 ## Bricks Design System reference — `<MCP_SERVER_NAME>`
 
