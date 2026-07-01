@@ -10,8 +10,36 @@ One command to set up a new project created from **brxprod-claude-starter**: tai
 Run the steps **in order**, and confirm each result (read-back / directory listing) before moving on. Keep the tone friendly — this is someone's first run.
 
 ## Prerequisites
-- Run this from the **project root** of a copy of the starter — it should contain **`CLAUDE.starter.md`** and a **`skills/`** folder.
-- If both are missing, say this doesn't look like a fresh starter copy and stop (don't guess paths).
+- The starter's contents (`CLAUDE.starter.md`, `skills/`, reference MD files, `.claude/`) must be at the **project root** — the same folder Claude Code has open as its working directory.
+- If both `CLAUDE.starter.md` and `skills/` are missing from the CWD, say this doesn't look like a fresh starter copy and stop (don't guess paths).
+
+## Step 0 — Confirm the project root (run before anything else)
+
+The starter is sometimes cloned into a **subfolder** of the actual project (e.g. `my-project/brxprod-claude-starter/`). If init runs from inside that subfolder, all reference MD files and `.claude/` land in the wrong place. Detect and fix this before proceeding.
+
+**Check:** does the CWD look like a subfolder of the real project root?
+- List the parent directory (`../`). If it contains project files (a `src/`, `wp-content/`, another `.git/`, etc.) it is likely the true project root.
+- Or simply ask the user: *"Is this folder the root of your project, or did you clone the starter into a subfolder?"*
+
+**If the starter IS in a subfolder** — move its contents up to the project root first, then continue init from there:
+
+- **macOS / Linux (bash)** — run from *inside* the starter subfolder:
+  ```bash
+  # e.g. starter is at my-project/brxprod-claude-starter/
+  shopt -s dotglob
+  mv * ../
+  cd ..
+  rmdir brxprod-claude-starter   # remove the now-empty subfolder
+  ```
+- **Windows (PowerShell)** — run from *inside* the starter subfolder:
+  ```powershell
+  # e.g. starter is at my-project\brxprod-claude-starter\
+  Get-ChildItem -Force | Move-Item -Destination ..\
+  Set-Location ..
+  Remove-Item brxprod-claude-starter -Force   # remove the now-empty subfolder
+  ```
+
+Verify that `CLAUDE.starter.md`, `skills/`, and the reference MD files (`BRICKS-COMPONENTS.md`, `BRICKS-RECIPES.md`, etc.) are now in the project root before continuing.
 
 ## Step 1 — Startup questions → tailor `CLAUDE.md`
 First make sure `CLAUDE.md` exists:
