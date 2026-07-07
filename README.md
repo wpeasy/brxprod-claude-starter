@@ -66,6 +66,18 @@ The template encodes (see `CLAUDE.starter.md` for the full rules):
 - **HTML semantics & accessibility** first — real lists, correct elements, a11y best practices.
 - **Element labels mirror the BEM class** so the Bricks structure panel matches the CSS.
 
+## The build process — how the rules get enforced
+
+The conventions above are only useful if Claude **follows** them. `CLAUDE.md` opens with a **"Working process (MUST)"** loop that Claude must run for every build task:
+
+1. **Read the applicable MUST rules first** and state which ones apply — don't build from memory.
+2. **Author to the conventions, not to the file's existing style** — if surrounding code already deviates, flag it rather than copy it.
+3. **Prefer a dedicated Novamira ability** over raw `execute-php` (abilities validate + write to the correct storage).
+4. **Verify the target site**, then read back after writing.
+5. **Definition of Done = a clean linter PASS, pasted.** After any Bricks build/edit, Claude runs `tools/bricks-lint.php` and pastes a clean PASS (errors = 0). **A page that renders correctly is not "done."**
+
+**How to hold Claude to it:** if it reports a Bricks build complete *without* a pasted linter PASS, ask for it — that's the gate. The linter (`tools/bricks-lint.php`) mechanically catches label / BEM-class / framework-class / `%root%` / raw-value / list-semantics / landmark / depth-first-order issues. It does **not** yet enforce every stylistic MUST (e.g. "variablize settings", "native nesting") — those still rely on the process loop, so a clean PASS is *necessary, not sufficient*. Keep the linter shipped with each site (`tools/bricks-lint.php`) and re-run it after edits.
+
 ## Notes
 
 - The rail band widths shown in the template are BRXProd **defaults**; the live values come from each site's `--brxp-*-width` variables.

@@ -31,6 +31,18 @@
 
 Guidance for Claude Code when working in this project.
 
+## ⚠️ Working process — the loop for EVERY build task (MUST)
+
+These conventions only help if they are **followed**. The known failure mode is drifting to whatever style already exists in the file, and reporting "done" because it renders. For **every** code / CSS / element task, run this loop:
+
+1. **Read before you write.** Skim the relevant MUST rules below *before* authoring — do not rely on memory. Briefly **state the specific rules that apply** to what you're about to build (e.g. "variablize settings, native nesting, Rails band, list semantics, one class per element").
+2. **Author to THESE conventions, not to the file's existing style.** When extending existing code, conform the new code to the rules here. If the surrounding code already deviates, do **not** copy it — **flag the deviation** instead. "Consistency with the file" never overrides "consistency with these rules".
+3. **Prefer a dedicated Novamira ability over raw `execute-php`.** If an ability exists for the task — Bricks (`bricks-get-content`/`-set-content`/`-insert-content`/`-remove-content`/`-patch-elements`, `bricks-create-template`, `bricks-*-component`, `bricks-list-elements`, global-class/variable abilities, `bricks-get-theme-style`) or Meta Box (`metabox-list/get/edit/create-field-group`, `metabox-get-field-type-schema`, `metabox-read/write-values`, `metabox-*-post-type`/`-taxonomy`/`-settings-page`) — **use it**; it validates and writes to the *correct* storage (e.g. a Meta Box field group lives across the `fields`/`meta_box`/`settings` post-meta, not `post_content`). **Discover first** with `discover-abilities` / `get-ability-info`. Reserve `execute-php` for inspection / read-backs and genuine one-offs no ability covers.
+4. **Verify the site, then verify the write.** Confirm the target site (see the Site target guard above) before any state-changing call; **read back** after every write.
+5. **Definition of Done = a clean linter PASS, pasted.** After any Bricks build/edit, run `tools/bricks-lint.php` (via `execute-php`) and **paste a clean PASS (errors = 0)**. A page that renders correctly is **NOT** done. Treat a linter failure like a failing test — fix, re-run, then report. (Full list of checks in **Build conformance — Definition of Done** below.)
+
+If you catch yourself about to write CSS / elements without having done steps 1–3, **stop and do them first**.
+
 This site is a **Bricks** WordPress build, operated through the connected Novamira MCP server (`<MCP_SERVER_NAME>`). When styling pages or building elements, prefer the design-system **variable names** and **global classes** below over hard-coded values.
 
 The design system has two layers, and we use **only** these two:
